@@ -193,7 +193,7 @@ def main(win):
                 cursorX += 1
             elif key == curses.KEY_LEFT and cursorX > 0:
                 cursorX -= 1
-            elif key == 32 and not waiting:  # Space
+            elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
                 send_missile()
             draw_enemy_board()
             unicorn.set_pixel(cursorX,cursorY,255,255,255)
