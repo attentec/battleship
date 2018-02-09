@@ -69,7 +69,7 @@ def draw_sunken_board():
     for y in range(len(los_board)):
         for x in range(len(los_board[y])):
             if los_board[y][x]:
-                unicorn.set_pixel(x,y,255,0,0)
+                unicorn.set_pixel(x,y,0,255,0)
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
@@ -84,7 +84,7 @@ def draw_victory_board():
     for y in range(len(vic_board)):
         for x in range(len(vic_board[y])):
             if vic_board[y][x]:
-                unicorn.set_pixel(x,y,0,255,0)
+                unicorn.set_pixel(x,y,255,0,0)
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
@@ -113,10 +113,10 @@ def await_incomming():
     if ally_board[coordinates[0]][coordinates[1]] == 1:
         res = 2
         ally_board[coordinates[0]][coordinates[1]] = 2
+        lost = has_lost()
     else:
         res = 3
         ally_board[coordinates[0]][coordinates[1]] = 3
-        lost = has_lost()
     if lost:
         connection.send_data(4)
         draw_sunken_board()
