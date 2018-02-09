@@ -42,7 +42,7 @@ def draw_enemy_board():
             if enemy_board[y][x] == 2:
                 unicorn.set_pixel(x,y,255,0,0)
             elif enemy_board[y][x] == 3:
-                unicorn.set_pixel(x,y,0,255,0)
+                unicorn.set_pixel(x,y,255,255,255)
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
@@ -50,8 +50,12 @@ def draw_enemy_board():
 def draw_ally_board():
     for y in range(len(ally_board)):
         for x in range(len(ally_board[y])):
-            if ally_board[y][x]:
-                unicorn.set_pixel(x,y,255,0,0)
+            if ally_board[y][x] == 1:
+                unicorn.set_pixel(x,y,0,255,0)
+            elif ally_board[y][x] == 2:
+                unicorn.set_pixel(x, y, 255, 0, 0)
+            elif ally_board[y][x] == 3:
+                unicorn.set_pixel(x, y, 255, 255, 255)
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
@@ -91,11 +95,13 @@ def send_missile():
     response = connection.receive_data()
     if response == 4:
         draw_victory_board()
+        unicorn.show()
         sleep(3)
         connection.close_connection()
         exit(0)
     enemy_board[cursorY][cursorX] = response
     draw_enemy_board()
+    unicorn.show()
     waiting = True
     sleep(1)
 
@@ -114,11 +120,14 @@ def await_incomming():
     if lost:
         connection.send_data(4)
         draw_sunken_board()
+        unicorn.show()
         sleep(3)
         connection.close_connection()
         exit(0)
     else:
         connection.send_data(res)
+    draw_ally_board()
+    unicorn.show()
     waiting = False
     sleep(1)
 
@@ -156,7 +165,6 @@ def main(win):
                     ship.length -= 1
                     if ship.length == 0:
                         setup = False
-                        draw_enemy_board()
             draw_ally_board()
             ship.draw(unicorn, ally_board)
         else:
