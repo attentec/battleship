@@ -42,7 +42,7 @@ def draw_enemy_board():
             if enemy_board[y][x] == 2:
                 unicorn.set_pixel(x,y,255,0,0)
             elif enemy_board[y][x] == 3:
-                unicorn.set_pixel(x,y,255,255,255)
+                unicorn.set_pixel(x,y,0,0,255)
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
@@ -55,7 +55,7 @@ def draw_ally_board():
             elif ally_board[y][x] == 2:
                 unicorn.set_pixel(x, y, 255, 0, 0)
             elif ally_board[y][x] == 3:
-                unicorn.set_pixel(x, y, 255, 255, 255)
+                unicorn.set_pixel(x, y, 0, 0, 255)
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
@@ -100,10 +100,17 @@ def send_missile():
         connection.close_connection()
         exit(0)
     enemy_board[cursorY][cursorX] = response
-    draw_enemy_board()
-    unicorn.show()
     waiting = True
-    sleep(2)
+    for i in range(0, 5):
+        enemy_board[cursorY][cursorX] = response
+        draw_enemy_board()
+        unicorn.show()
+        sleep(0.5)
+        enemy_board[cursorY][cursorX] = 0
+        draw_enemy_board()
+        unicorn.show()
+        sleep(0.5)
+    enemy_board[cursorY][cursorX] = response
 
 
 def await_incomming():
@@ -112,11 +119,9 @@ def await_incomming():
     lost = False
     if ally_board[coordinates[0]][coordinates[1]] == 1:
         res = 2
-        ally_board[coordinates[0]][coordinates[1]] = 2
         lost = has_lost()
     else:
         res = 3
-        ally_board[coordinates[0]][coordinates[1]] = 3
     if lost:
         connection.send_data(4)
         draw_sunken_board()
@@ -126,10 +131,17 @@ def await_incomming():
         exit(0)
     else:
         connection.send_data(res)
-    draw_ally_board()
-    unicorn.show()
     waiting = False
-    sleep(2)
+    for i in range(0, 5):
+        ally_board[coordinates[0]][coordinates[1]] = res
+        draw_ally_board()
+        unicorn.show()
+        sleep(0.5)
+        ally_board[coordinates[0]][coordinates[1]] = 0
+        draw_ally_board()
+        unicorn.show()
+        sleep(0.5)
+    ally_board[coordinates[0]][coordinates[1]] = res
 
 
 def has_lost():
@@ -179,7 +191,7 @@ def main(win):
             elif key == 32 and not waiting:  # Space
                 send_missile()
             draw_enemy_board()
-            unicorn.set_pixel(cursorX,cursorY,0,0,255)
+            unicorn.set_pixel(cursorX,cursorY,255,255,255)
 
             if waiting:
                 draw_ally_board()
