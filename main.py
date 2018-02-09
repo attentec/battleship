@@ -96,7 +96,9 @@ def send_missile():
     if response == 4:
         draw_victory_board()
         unicorn.show()
-        sleep(6)
+        sleep(4)
+        if is_host:
+            sleep(2)
         connection.close_connection()
         exit(0)
     enemy_board[cursorY][cursorX] = response
@@ -127,7 +129,9 @@ def await_incomming():
         connection.send_data(4)
         draw_sunken_board()
         unicorn.show()
-        sleep(6)
+        sleep(4)
+        if is_host:
+            sleep(2)
         connection.close_connection()
         exit(0)
     else:
