@@ -105,11 +105,11 @@ def send_missile():
         enemy_board[cursorY][cursorX] = response
         draw_enemy_board()
         unicorn.show()
-        sleep(0.3)
+        sleep(0.2)
         enemy_board[cursorY][cursorX] = 0
         draw_enemy_board()
         unicorn.show()
-        sleep(0.3)
+        sleep(0.2)
     enemy_board[cursorY][cursorX] = response
 
 
@@ -136,11 +136,11 @@ def await_incomming():
         ally_board[coordinates[0]][coordinates[1]] = res
         draw_ally_board()
         unicorn.show()
-        sleep(0.3)
+        sleep(0.2)
         ally_board[coordinates[0]][coordinates[1]] = 0
         draw_ally_board()
         unicorn.show()
-        sleep(0.3)
+        sleep(0.2)
     ally_board[coordinates[0]][coordinates[1]] = res
 
 
