@@ -59,7 +59,8 @@ def draw_ally_board():
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
-def draw_sunken_board():
+
+def draw_victory_board():
     los_board = [
         [0, 0, 1, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -73,8 +74,7 @@ def draw_sunken_board():
             else:
                 unicorn.set_pixel(x,y,0,0,0)
 
-
-def draw_victory_board():
+def draw_sunken_board():
     vic_board = [
         [0, 0, 1, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -168,13 +168,13 @@ def main(win):
             draw_ally_board()
             ship.draw(unicorn, ally_board)
         else:
-            if key == curses.KEY_DOWN:
+            if key == curses.KEY_DOWN and cursorY < 3:
                 cursorY += 1
-            elif key == curses.KEY_UP:
+            elif key == curses.KEY_UP and cursorY > 0:
                 cursorY -= 1
-            elif key == curses.KEY_RIGHT:
+            elif key == curses.KEY_RIGHT and cursorX < 7:
                 cursorX += 1
-            elif key == curses.KEY_LEFT:
+            elif key == curses.KEY_LEFT and cursorX > 0:
                 cursorX -= 1
             elif key == 32 and not waiting:  # Space
                 send_missile()
