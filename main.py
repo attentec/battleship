@@ -101,15 +101,15 @@ def send_missile():
         exit(0)
     enemy_board[cursorY][cursorX] = response
     waiting = True
-    for i in range(0, 5):
+    for i in range(0, 4):
         enemy_board[cursorY][cursorX] = response
         draw_enemy_board()
         unicorn.show()
-        sleep(0.5)
+        sleep(0.3)
         enemy_board[cursorY][cursorX] = 0
         draw_enemy_board()
         unicorn.show()
-        sleep(0.5)
+        sleep(0.3)
     enemy_board[cursorY][cursorX] = response
 
 
@@ -132,15 +132,15 @@ def await_incomming():
     else:
         connection.send_data(res)
     waiting = False
-    for i in range(0, 5):
+    for i in range(0, 4):
         ally_board[coordinates[0]][coordinates[1]] = res
         draw_ally_board()
         unicorn.show()
-        sleep(0.5)
+        sleep(0.3)
         ally_board[coordinates[0]][coordinates[1]] = 0
         draw_ally_board()
         unicorn.show()
-        sleep(0.5)
+        sleep(0.3)
     ally_board[coordinates[0]][coordinates[1]] = res
 
 
