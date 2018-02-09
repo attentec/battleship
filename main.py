@@ -119,6 +119,7 @@ def await_incomming():
     lost = False
     if ally_board[coordinates[0]][coordinates[1]] == 1:
         res = 2
+        ally_board[coordinates[0]][coordinates[1]] = 2
         lost = has_lost()
     else:
         res = 3
