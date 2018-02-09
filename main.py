@@ -96,14 +96,14 @@ def send_missile():
     if response == 4:
         draw_victory_board()
         unicorn.show()
-        sleep(3)
+        sleep(6)
         connection.close_connection()
         exit(0)
     enemy_board[cursorY][cursorX] = response
     draw_enemy_board()
     unicorn.show()
     waiting = True
-    sleep(1)
+    sleep(2)
 
 
 def await_incomming():
@@ -121,7 +121,7 @@ def await_incomming():
         connection.send_data(4)
         draw_sunken_board()
         unicorn.show()
-        sleep(3)
+        sleep(6)
         connection.close_connection()
         exit(0)
     else:
@@ -129,7 +129,7 @@ def await_incomming():
     draw_ally_board()
     unicorn.show()
     waiting = False
-    sleep(1)
+    sleep(2)
 
 
 def has_lost():
@@ -183,6 +183,7 @@ def main(win):
 
             if waiting:
                 draw_ally_board()
+                unicorn.show()
                 await_incomming()
                 curses.flushinp()
         unicorn.show()
