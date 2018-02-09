@@ -141,8 +141,6 @@ def main(win):
         key = win.getch()
         unicorn.clear()
         if setup:
-            draw_ally_board()
-            ship.draw(unicorn, ally_board)
             if key == curses.KEY_DOWN:
                 ship.move_down()
             elif key == curses.KEY_UP:
@@ -158,9 +156,10 @@ def main(win):
                     ship.length -= 1
                     if ship.length == 0:
                         setup = False
+                        draw_enemy_board()
+            draw_ally_board()
+            ship.draw(unicorn, ally_board)
         else:
-            draw_enemy_board()
-
             if key == curses.KEY_DOWN:
                 cursorY += 1
             elif key == curses.KEY_UP:
@@ -171,12 +170,13 @@ def main(win):
                 cursorX -= 1
             elif key == 32 and not waiting:  # Space
                 send_missile()
-
+            draw_enemy_board()
             unicorn.set_pixel(cursorX,cursorY,0,0,255)
 
             if waiting:
                 draw_ally_board()
                 await_incomming()
+                curses.flushinp()
         unicorn.show()
 
 
