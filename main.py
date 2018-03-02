@@ -51,7 +51,7 @@ los_board = [
 
 
 def reset(win):
-    global enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, setup, ship
+    global enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, setup, ship, waiting_for_rematch
     enemy_board = [
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -69,8 +69,7 @@ def reset(win):
     cursorX = 0
     cursorY = 0
 
-    enemy_turn = False
-    waiting = True
+    waiting_for_rematch = False
     ship = Ship(3)
     place_ships(win)
 
@@ -140,6 +139,7 @@ def send_missile():
     global cursorX, cursorY, connection, waiting, waiting_for_rematch
     connection.send_data([cursorY, cursorX])
     response = connection.receive_data()
+    blink_and_set(enemy_board, cursorX, cursorY, response)
     if response == 4:
         draw_board(vic_board)
         unicorn.show()
@@ -149,7 +149,6 @@ def send_missile():
         waiting_for_rematch = True
     enemy_board[cursorY][cursorX] = response
     waiting = True
-    blink_and_set(enemy_board, cursorX, cursorY, response)
 
 
 def await_incoming():
@@ -184,6 +183,7 @@ def has_lost():
             if ally_board[y][x] == 1:
                 return False
     return True
+
 
 def place_ships(win):
     while (ship.length):
@@ -231,11 +231,12 @@ def main(win):
         draw_board(enemy_board)
         unicorn.set_pixel(cursorX,cursorY,255,255,255)
 
-        if waiting:
+        if waiting and not waiting_for_rematch:
             draw_board(ally_board)
             unicorn.show()
             await_incoming()
             curses.flushinp()
+
         if waiting_for_rematch:
             rematch(win)
         unicorn.show()
