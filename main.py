@@ -108,7 +108,7 @@ def send_missile():
     enemy_board[cursorY][cursorX] = response
 
 
-def await_incomming():
+def await_incoming():
     global connection, waiting
     coordinates = connection.receive_data()
     lost = False
@@ -194,7 +194,7 @@ def main(win):
             if waiting:
                 draw_board(ally_board)
                 unicorn.show()
-                await_incomming()
+                await_incoming()
                 curses.flushinp()
         unicorn.show()
 
