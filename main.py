@@ -49,6 +49,13 @@ los_board = [
         [0, 2, 0, 0, 0, 0, 2, 0]
     ]
 
+def blink_and_set(board, x, y, value):
+    for i in range(1, 9):
+        board[y][x] = value if i % 2 else 0
+        draw_board(board)
+        unicorn.show()
+        sleep(0.2)
+    board[y][x] = value
 
 def get_color(color):
     """
@@ -96,30 +103,22 @@ def send_missile():
         exit(0)
     enemy_board[cursorY][cursorX] = response
     waiting = True
-    for i in range(0, 4):
-        enemy_board[cursorY][cursorX] = response
-        draw_board(enemy_board)
-        unicorn.show()
-        sleep(0.2)
-        enemy_board[cursorY][cursorX] = 0
-        draw_board(enemy_board)
-        unicorn.show()
-        sleep(0.2)
-    enemy_board[cursorY][cursorX] = response
-
+    blink_and_set(enemy_board, cursorX, cursorY, response)
 
 def await_incoming():
     global connection, waiting
-    coordinates = connection.receive_data()
+    y, x = connection.receive_data()
     lost = False
-    if ally_board[coordinates[0]][coordinates[1]] == 1:
+    if ally_board[y][x] == 1:
         res = 2
-        ally_board[coordinates[0]][coordinates[1]] = 2
+        ally_board[y][x] = 2
         lost = has_lost()
     else:
         res = 3
+
     if lost:
         connection.send_data(4)
+        blink_and_set(ally_board, x, y, res)
         draw_board(los_board)
         unicorn.show()
         sleep(4)
@@ -129,18 +128,8 @@ def await_incoming():
         exit(0)
     else:
         connection.send_data(res)
+        blink_and_set(ally_board, x, y, res)
     waiting = False
-    for i in range(0, 4):
-        ally_board[coordinates[0]][coordinates[1]] = res
-        draw_board(ally_board)
-        unicorn.show()
-        sleep(0.2)
-        ally_board[coordinates[0]][coordinates[1]] = 0
-        draw_board(ally_board)
-        unicorn.show()
-        sleep(0.2)
-    ally_board[coordinates[0]][coordinates[1]] = res
-
 
 def has_lost():
     for y in range(len(ally_board)):
