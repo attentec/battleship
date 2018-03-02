@@ -8,55 +8,37 @@ class Ship:
         self.length = length
 
     def rotate(self):
+        if self.length == 1:
+            return
+        new_x = self.x[:]
+        new_y = self.y[:]
         if self.rotation == 0:
-            new_x = self.x[:]
-            new_y = self.y[:]
             new_x[1] -= 1
             new_x[2] -= 2
             new_y[1] += 1
             new_y[2] += 2
-            if self.rotation_invalid(new_x, new_y):
-                return
-            self.x = new_x
-            self.y = new_y
-            self.rotation = 90
         elif self.rotation == 90:
-            new_x = self.x[:]
-            new_y = self.y[:]
             new_x[1] -= 1
             new_x[2] -= 2
             new_y[1] -= 1
             new_y[2] -= 2
-            if self.rotation_invalid(new_x, new_y):
-                return
-            self.x = new_x
-            self.y = new_y
-            self.rotation = 180
         elif self.rotation == 180:
-            new_x = self.x[:]
-            new_y = self.y[:]
             new_x[1] += 1
             new_x[2] += 2
             new_y[1] -= 1
             new_y[2] -= 2
-            if self.rotation_invalid(new_x, new_y):
-                return
-            self.x = new_x
-            self.y = new_y
-            self.rotation = 270
         elif self.rotation == 270:
-            new_x = self.x[:]
-            new_y = self.y[:]
             new_x[1] += 1
             new_x[2] += 2
             new_y[1] += 1
             new_y[2] += 2
-            if self.rotation_invalid(new_x, new_y):
-                return
-            print("gmm")
-            self.x = new_x
-            self.y = new_y
-            self.rotation = 0
+
+        if self.rotation_invalid(new_x, new_y):
+            return
+
+        self.rotation =  (self.rotation + 90) % 360
+        self.x = new_x
+        self.y = new_y
 
     def rotation_invalid(self, new_x, new_y):
         return max(new_x[0:self.length]) > 7 or min(new_x[0:self.length]) < 0 or max(new_y[0:self.length]) > 3 or min(new_y[0:self.length]) < 0
