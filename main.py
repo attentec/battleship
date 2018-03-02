@@ -35,58 +35,51 @@ setup = True
 connection = None
 ship = Ship(3)
 
-
-def draw_enemy_board():
-    for y in range(len(enemy_board)):
-        for x in range(len(enemy_board[y])):
-            if enemy_board[y][x] == 2:
-                unicorn.set_pixel(x,y,255,0,0)
-            elif enemy_board[y][x] == 3:
-                unicorn.set_pixel(x,y,0,0,255)
-            else:
-                unicorn.set_pixel(x,y,0,0,0)
-
-
-def draw_ally_board():
-    for y in range(len(ally_board)):
-        for x in range(len(ally_board[y])):
-            if ally_board[y][x] == 1:
-                unicorn.set_pixel(x,y,0,255,0)
-            elif ally_board[y][x] == 2:
-                unicorn.set_pixel(x, y, 255, 0, 0)
-            elif ally_board[y][x] == 3:
-                unicorn.set_pixel(x, y, 0, 0, 255)
-            else:
-                unicorn.set_pixel(x,y,0,0,0)
-
-
-def draw_victory_board():
-    los_board = [
+vic_board = [
         [0, 0, 1, 0, 0, 1, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
         [0, 1, 0, 0, 0, 0, 1, 0],
         [0, 0, 1, 1, 1, 1, 0, 0]
     ]
-    for y in range(len(los_board)):
-        for x in range(len(los_board[y])):
-            if los_board[y][x]:
-                unicorn.set_pixel(x,y,0,255,0)
-            else:
-                unicorn.set_pixel(x,y,0,0,0)
 
-def draw_sunken_board():
-    vic_board = [
-        [0, 0, 1, 0, 0, 1, 0, 0],
+los_board = [
+        [0, 0, 2, 0, 0, 2, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0]
+        [0, 0, 2, 2, 2, 2, 0, 0],
+        [0, 2, 0, 0, 0, 0, 2, 0]
     ]
-    for y in range(len(vic_board)):
-        for x in range(len(vic_board[y])):
-            if vic_board[y][x]:
-                unicorn.set_pixel(x,y,255,0,0)
-            else:
-                unicorn.set_pixel(x,y,0,0,0)
+
+
+def get_color(color):
+    """
+    0: black,
+    1: green,
+    2: red,
+    3: blue,
+    other: black
+    :param color: Int representing a color
+    :return: (r, g, b)
+    """
+    if color == 0:
+        return 0, 0, 0
+    elif color == 1:
+        return 0, 255, 0
+    elif color == 2:
+        return 255, 0, 0
+    elif color == 3:
+        return 0, 0, 255
+    else:
+        return 0, 0, 0
+
+
+def draw_board(board):
+    """
+    Draw board on unicorn
+    """
+    for y in range(len(board)):
+        for x in range(len(board[y])):
+            r, g, b = get_color(board[y][x])
+            unicorn.set_pixel(x, y, r, g, b)
 
 
 def send_missile():
@@ -94,7 +87,7 @@ def send_missile():
     connection.send_data([cursorY, cursorX])
     response = connection.receive_data()
     if response == 4:
-        draw_victory_board()
+        draw_board(vic_board)
         unicorn.show()
         sleep(4)
         if is_host:
@@ -105,11 +98,11 @@ def send_missile():
     waiting = True
     for i in range(0, 4):
         enemy_board[cursorY][cursorX] = response
-        draw_enemy_board()
+        draw_board(enemy_board)
         unicorn.show()
         sleep(0.2)
         enemy_board[cursorY][cursorX] = 0
-        draw_enemy_board()
+        draw_board(enemy_board)
         unicorn.show()
         sleep(0.2)
     enemy_board[cursorY][cursorX] = response
@@ -127,7 +120,7 @@ def await_incomming():
         res = 3
     if lost:
         connection.send_data(4)
-        draw_sunken_board()
+        draw_board(los_board)
         unicorn.show()
         sleep(4)
         if is_host:
@@ -139,11 +132,11 @@ def await_incomming():
     waiting = False
     for i in range(0, 4):
         ally_board[coordinates[0]][coordinates[1]] = res
-        draw_ally_board()
+        draw_board(ally_board)
         unicorn.show()
         sleep(0.2)
         ally_board[coordinates[0]][coordinates[1]] = 0
-        draw_ally_board()
+        draw_board(ally_board)
         unicorn.show()
         sleep(0.2)
     ally_board[coordinates[0]][coordinates[1]] = res
@@ -182,7 +175,7 @@ def main(win):
                     ship.length -= 1
                     if ship.length == 0:
                         setup = False
-            draw_ally_board()
+            draw_board(ally_board)
             ship.draw(unicorn, ally_board)
         else:
             if key == curses.KEY_DOWN and cursorY < 3:
@@ -195,11 +188,11 @@ def main(win):
                 cursorX -= 1
             elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
                 send_missile()
-            draw_enemy_board()
+            draw_board(enemy_board)
             unicorn.set_pixel(cursorX,cursorY,255,255,255)
 
             if waiting:
-                draw_ally_board()
+                draw_board(ally_board)
                 unicorn.show()
                 await_incomming()
                 curses.flushinp()
