@@ -13,25 +13,25 @@ class Ship:
         new_x = self.x[:]
         new_y = self.y[:]
         if self.rotation == 0:
-            new_x[1] -= 1
-            new_x[2] -= 2
-            new_y[1] += 1
-            new_y[2] += 2
+            new_x[0] += 1
+            new_x[2] -= 1
+            new_y[0] -= 1
+            new_y[2] += 1
         elif self.rotation == 90:
-            new_x[1] -= 1
-            new_x[2] -= 2
-            new_y[1] -= 1
-            new_y[2] -= 2
+            new_x[0] += 1
+            new_x[2] -= 1
+            new_y[0] += 1
+            new_y[2] -= 1
         elif self.rotation == 180:
-            new_x[1] += 1
-            new_x[2] += 2
-            new_y[1] -= 1
-            new_y[2] -= 2
+            new_x[0] -= 1
+            new_x[2] += 1
+            new_y[0] += 1
+            new_y[2] -= 1
         elif self.rotation == 270:
-            new_x[1] += 1
-            new_x[2] += 2
-            new_y[1] += 1
-            new_y[2] += 2
+            new_x[0] -= 1
+            new_x[2] += 1
+            new_y[0] -= 1
+            new_y[2] += 1
 
         if self.rotation_invalid(new_x, new_y):
             return
