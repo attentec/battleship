@@ -31,7 +31,6 @@ enemy_ip = ""
 enemy_turn = False
 is_host = False
 waiting = True
-setup = True
 connection = None
 ship = Ship(3)
 
@@ -181,53 +180,57 @@ def has_lost():
                 return False
     return True
 
+def place_ships(win):
+    while (ship.length):
+        sleep(0.1)
+        key = win.getch()
+        unicorn.clear()
+        if key == curses.KEY_DOWN:
+            ship.move_down()
+        elif key == curses.KEY_UP:
+            ship.move_up()
+        elif key == curses.KEY_RIGHT:
+            ship.move_right()
+        elif key == curses.KEY_LEFT:
+            ship.move_left()
+        elif key == 114:  # R
+            ship.rotate()
+        elif key == 32:  # Space
+            ship.place(ally_board)
+        draw_board(ally_board)
+        ship.draw(unicorn, ally_board)
+        unicorn.show()
+        
 
 def main(win):
-    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, setup
-    
+    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship
+
     win.nodelay(True)
 
+    place_ships(win)
+    
     while True:
         sleep(0.1)    
         key = win.getch()
         unicorn.clear()
-        if setup:
-            if key == curses.KEY_DOWN:
-                ship.move_down()
-            elif key == curses.KEY_UP:
-                ship.move_up()
-            elif key == curses.KEY_RIGHT:
-                ship.move_right()
-            elif key == curses.KEY_LEFT:
-                ship.move_left()
-            elif key == 114:  # r
-                ship.rotate()
-            elif key == 32:  # Space
-                if ship.place(ally_board):
-                    ship.length -= 1
-                    if ship.length == 0:
-                        setup = False
-            draw_board(ally_board)
-            ship.draw(unicorn, ally_board)
-        else:
-            if key == curses.KEY_DOWN and cursorY < 3:
-                cursorY += 1
-            elif key == curses.KEY_UP and cursorY > 0:
-                cursorY -= 1
-            elif key == curses.KEY_RIGHT and cursorX < 7:
-                cursorX += 1
-            elif key == curses.KEY_LEFT and cursorX > 0:
-                cursorX -= 1
-            elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
-                send_missile()
-            draw_board(enemy_board)
-            unicorn.set_pixel(cursorX,cursorY,255,255,255)
+        if key == curses.KEY_DOWN and cursorY < 3:
+            cursorY += 1
+        elif key == curses.KEY_UP and cursorY > 0:
+            cursorY -= 1
+        elif key == curses.KEY_RIGHT and cursorX < 7:
+            cursorX += 1
+        elif key == curses.KEY_LEFT and cursorX > 0:
+            cursorX -= 1
+        elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
+            send_missile()
+        draw_board(enemy_board)
+        unicorn.set_pixel(cursorX,cursorY,255,255,255)
 
-            if waiting:
-                draw_board(ally_board)
-                unicorn.show()
-                await_incoming()
-                curses.flushinp()
+        if waiting:
+            draw_board(ally_board)
+            unicorn.show()
+            await_incoming()
+            curses.flushinp()
         unicorn.show()
 
 

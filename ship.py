@@ -82,9 +82,7 @@ class Ship:
         if not self.colliding:
             for i in range(self.length):
                 board[self.y[i]][self.x[i]] = 1
-            return True
-        else:
-            return False
+            self.length -= 1
 
     def draw(self, unicorn, board):
         self.check_collision(board)
