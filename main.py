@@ -88,6 +88,8 @@ def rematch(win):
                 return
             else:
                 print("Opponent quit")
+                connection.close_connection()
+                sleep(2)
                 exit(0)
         elif key == 110:
             connection.send_data(False)
@@ -118,7 +120,7 @@ def get_color(color):
         return 0, 0, 0
     elif color == 1:
         return 0, 255, 0
-    elif color == 2:
+    elif color == 2 or color == 4:
         return 255, 0, 0
     elif color == 3:
         return 0, 0, 255
