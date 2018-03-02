@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from time import sleep
 import unicornhat as unicorn
-import random
+import sys
 import curses
 from comunication import Connection
 from ship import Ship
@@ -199,17 +199,46 @@ def main(win):
         unicorn.show()
 
 
-is_host_input = input("Host? [y/n] ")
-if is_host_input.upper() == "Y":
-    is_host = True
-    waiting = False
-    connection = Connection("0.0.0.0", False)
+def init_game():
+    global is_host, enemy_ip, waiting, connection
+    if len(sys.argv) == 1:
+        is_host_input = input("Host? [y/n] ")
+        if is_host_input.upper() == "Y":
+            is_host = True
+        if not is_host:
+            enemy_ip = input("Enemy ip: ")
+    elif len(sys.argv) == 2 and sys.argv[1].lower() == "host":
+        is_host = True
+    elif len(sys.argv) == 2 and sys.argv[1].lower() == "client":
+        print("You must provide an ip-address to the host")
+        exit(1)
+    elif len(sys.argv) == 3 and sys.argv[1].lower() == "client":
+        enemy_ip = sys.argv[2]
+    else:
+        print("Unknown argument provided")
+        exit(1)
 
-if not is_host:
-    enemy_ip = input("Enemy ip: ")
-    connection = Connection(enemy_ip, True)
+    if is_host:
+        waiting = False
+        connection = Connection("0.0.0.0", False)
+    else:
+        try:
+            connection = Connection(enemy_ip, True)
+        except ConnectionRefusedError:
+            print("No host found at: {}".format(enemy_ip))
+            exit(2)
+        except OSError:
+            print("Invalid ip-address.")
+            exit(2)
+    try:
+        curses.wrapper(main)
+    except:
+        connection.close_connection()
 
-try:
-    curses.wrapper(main)
-except:
-    connection.close_connection()
+
+if __name__ == '__main__':
+    try:
+        init_game()
+    except KeyboardInterrupt:
+        print("\n\nBye")
+        exit(0)
