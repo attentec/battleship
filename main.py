@@ -50,6 +50,47 @@ los_board = [
     ]
 
 
+def reset():
+    global enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, setup, ship
+    enemy_board = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+    ally_board = [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+    cursorX = 0
+    cursorY = 0
+
+    enemy_turn = False
+    waiting = True
+    setup = True
+    ship = Ship(3)
+
+
+def rematch():
+    play_rematch = input("Rematch? [y/n] ")
+    if play_rematch.upper() == "Y":
+        connection.send_data(True)
+        response = connection.receive_data()
+        if response:
+            reset()
+        else:
+            print("Opponent quit")
+            exit(0)
+    else:
+        connection.send_data(False)
+        connection.close_connection()
+        exit(0)
+
+
 def blink_and_set(board, x, y, value):
     for i in range(1, 9):
         board[y][x] = value if i % 2 else 0
@@ -100,9 +141,8 @@ def send_missile():
         unicorn.show()
         sleep(4)
         if is_host:
-            sleep(2)
-        connection.close_connection()
-        exit(0)
+            sleep(1)
+        rematch()
     enemy_board[cursorY][cursorX] = response
     waiting = True
     blink_and_set(enemy_board, cursorX, cursorY, response)
@@ -127,8 +167,7 @@ def await_incoming():
         sleep(4)
         if is_host:
             sleep(2)
-        connection.close_connection()
-        exit(0)
+        rematch()
     else:
         connection.send_data(res)
         blink_and_set(ally_board, x, y, res)
