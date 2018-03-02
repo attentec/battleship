@@ -49,6 +49,7 @@ los_board = [
         [0, 2, 0, 0, 0, 0, 2, 0]
     ]
 
+
 def blink_and_set(board, x, y, value):
     for i in range(1, 9):
         board[y][x] = value if i % 2 else 0
@@ -56,6 +57,7 @@ def blink_and_set(board, x, y, value):
         unicorn.show()
         sleep(0.2)
     board[y][x] = value
+
 
 def get_color(color):
     """
@@ -105,6 +107,7 @@ def send_missile():
     waiting = True
     blink_and_set(enemy_board, cursorX, cursorY, response)
 
+
 def await_incoming():
     global connection, waiting
     y, x = connection.receive_data()
@@ -130,6 +133,7 @@ def await_incoming():
         connection.send_data(res)
         blink_and_set(ally_board, x, y, res)
     waiting = False
+
 
 def has_lost():
     for y in range(len(ally_board)):
@@ -221,8 +225,10 @@ def init_game():
             exit(2)
     try:
         curses.wrapper(main)
-    except:
+    except EOFError:
+        print("Opponent disconnected")
         connection.close_connection()
+        exit(0)
 
 
 if __name__ == '__main__':
