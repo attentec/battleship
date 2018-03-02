@@ -236,6 +236,8 @@ def main(win):
             unicorn.show()
             await_incoming()
             curses.flushinp()
+        if waiting_for_rematch:
+            rematch(win)
         unicorn.show()
 
 
