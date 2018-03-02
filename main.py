@@ -85,6 +85,7 @@ def rematch(win):
             response = connection.receive_data()
             if response:
                 reset(win)
+                return
             else:
                 print("Opponent quit")
                 exit(0)
