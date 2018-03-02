@@ -1,11 +1,10 @@
 class Ship:
-    x = [0,1,2]
-    y = [0,0,0]
-    rotation = 0
-    colliding = False
-
     def __init__(self, length):
         self.length = length
+        self.x = [0,1,2]
+        self.y = [0,0,0]
+        self.rotation = 0
+        self.colliding = False
 
     def rotate(self):
         if self.length == 1:
