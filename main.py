@@ -31,6 +31,7 @@ enemy_ip = ""
 enemy_turn = False
 is_host = False
 waiting = True
+waiting_for_rematch = False
 connection = None
 ship = Ship(3)
 
@@ -49,7 +50,7 @@ los_board = [
     ]
 
 
-def reset():
+def reset(win):
     global enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, setup, ship
     enemy_board = [
         [0, 0, 0, 0, 0, 0, 0, 0],
@@ -70,24 +71,28 @@ def reset():
 
     enemy_turn = False
     waiting = True
-    setup = True
     ship = Ship(3)
+    place_ships(win)
 
 
-def rematch():
-    play_rematch = input("Rematch? [y/n] ")
-    if play_rematch.upper() == "Y":
-        connection.send_data(True)
-        response = connection.receive_data()
-        if response:
-            reset()
-        else:
-            print("Opponent quit")
+def rematch(win):
+    print("Rematch? [y/n] ")
+    while True:
+        sleep(0.1)
+        key = win.getch()
+        if key == 121:
+            print("Waiting for opponent response...")
+            connection.send_data(True)
+            response = connection.receive_data()
+            if response:
+                reset(win)
+            else:
+                print("Opponent quit")
+                exit(0)
+        elif key == 110:
+            connection.send_data(False)
+            connection.close_connection()
             exit(0)
-    else:
-        connection.send_data(False)
-        connection.close_connection()
-        exit(0)
 
 
 def blink_and_set(board, x, y, value):
@@ -132,7 +137,7 @@ def draw_board(board):
 
 
 def send_missile():
-    global cursorX, cursorY, connection, waiting
+    global cursorX, cursorY, connection, waiting, waiting_for_rematch
     connection.send_data([cursorY, cursorX])
     response = connection.receive_data()
     if response == 4:
@@ -141,14 +146,14 @@ def send_missile():
         sleep(4)
         if is_host:
             sleep(1)
-        rematch()
+        waiting_for_rematch = True
     enemy_board[cursorY][cursorX] = response
     waiting = True
     blink_and_set(enemy_board, cursorX, cursorY, response)
 
 
 def await_incoming():
-    global connection, waiting
+    global connection, waiting, waiting_for_rematch
     y, x = connection.receive_data()
     lost = False
     if ally_board[y][x] == 1:
@@ -166,7 +171,7 @@ def await_incoming():
         sleep(4)
         if is_host:
             sleep(2)
-        rematch()
+        waiting_for_rematch = True
     else:
         connection.send_data(res)
         blink_and_set(ally_board, x, y, res)
@@ -203,14 +208,14 @@ def place_ships(win):
         
 
 def main(win):
-    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship
+    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, waiting_for_rematch
 
     win.nodelay(True)
 
     place_ships(win)
     
     while True:
-        sleep(0.1)    
+        sleep(0.1)
         key = win.getch()
         unicorn.clear()
         if key == curses.KEY_DOWN and cursorY < 3:
