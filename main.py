@@ -91,6 +91,7 @@ def reset(win):
 
     waiting_for_rematch = False
     ship = Ship(3)
+    ai = Ai()
     place_ships(win)
 
 
@@ -284,7 +285,6 @@ def main(win):
 def init_game():
     global is_host, enemy_ip, waiting, connection, is_ai
     if args.ai:
-        args.host = True
         is_ai = True
 
     if not args.host and not args.ip:
