@@ -33,7 +33,7 @@ def show():
     global window
     window.refresh()
 
-def set_win(win):
+def set_window(win):
     global window
     window = win
     curses.start_color()

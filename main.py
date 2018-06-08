@@ -225,8 +225,10 @@ def place_ships(win):
 
 def main(win):
     global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, waiting_for_rematch
-
-    unicorn.set_win(win)
+    try:
+        unicorn.set_window(win)
+    except AttributeError:
+        pass
     win.nodelay(True)
 
     place_ships(win)
