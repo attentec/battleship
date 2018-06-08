@@ -16,3 +16,5 @@ To run the game on the Raspberry Pi with a unicorn pHAT no other flags should be
 To run the game in terminal run with `--display` or in an environment without unicornhat.
 
 To run a game without a display, useful when playing against the AI, run with `--no-display`.
+
+The default port is 5000 but can be changed by providing a number to `--port=<port nr>`

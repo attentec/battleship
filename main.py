@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 import argparse
-import sys
 import curses
 from time import sleep
 from comunication import Connection
 from ship import Ship
 from ai import Ai
+
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--host', action="store_true")
-parser.add_argument('--client', type=str, help='is client', dest='ip', default=None)
+parser.add_argument('--client', type=str, help='host ip', dest='ip', default=None)
 parser.add_argument('--display', action="store_true")
 parser.add_argument('--ai', action="store_true")
 parser.add_argument('--no-display', dest='no_display', action="store_true")
+parser.add_argument('--port', dest='port', type=int, default=5000)
 
 args = parser.parse_args()
 try:
@@ -216,7 +217,7 @@ def place_ships(win):
         unicorn.show()
         return
 
-    while (ship.length):
+    while ship.length:
         sleep(0.1)
         key = win.getch()
         unicorn.clear()
@@ -303,10 +304,10 @@ def init_game():
 
     if is_host:
         waiting = False
-        connection = Connection("0.0.0.0", False)
+        connection = Connection("0.0.0.0", False, args.port)
     else:
         try:
-            connection = Connection(enemy_ip, True)
+            connection = Connection(enemy_ip, True, args.port)
         except ConnectionRefusedError:
             print("No host found at: {}".format(enemy_ip))
             exit(2)

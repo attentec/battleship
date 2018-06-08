@@ -3,18 +3,23 @@ import curses
 PHAT = 0
 window = None
 
+
 def set_layout(layout):
     pass
+
 
 def rotation(degree):
     pass
 
+
 def brightness(percent):
     pass
+
 
 def clear():
     global window
     window.clear()
+
 
 def set_pixel(x, y, r, g, b):
     global window
@@ -36,10 +41,12 @@ def set_pixel(x, y, r, g, b):
     window.addstr(y * 3 + 2, x * 5 + 3, "█", curses.color_pair(color))
     window.addstr(y * 3 + 2, x * 5 + 4, "█", curses.color_pair(color))
 
+
 def show():
     global window
     add_border()
     window.refresh()
+
 
 def add_border():
     global window
@@ -64,6 +71,8 @@ def add_border():
         for x in range(0, 8):
             for l in range(1, 5):
                 window.addstr(y * 3, x * 5 + l, "─", curses.color_pair(6))
+    window.addstr(13, 0, " ", curses.color_pair(6))
+
 
 def set_window(win):
     global window
