@@ -5,10 +5,12 @@ import curses
 from time import sleep
 from comunication import Connection
 from ship import Ship
+from ai import Ai
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--host', action="store_true")
 parser.add_argument('--client', type=str, help='is client', dest='ip', default=None)
 parser.add_argument('--display', action="store_true")
+parser.add_argument('--ai', action="store_true")
 
 args = parser.parse_args()
 try:
@@ -43,10 +45,12 @@ cursorY = 0
 enemy_ip = ""
 enemy_turn = False
 is_host = False
+is_ai = False
 waiting = True
 waiting_for_rematch = False
 connection = None
 ship = Ship(3)
+ai = Ai()
 
 vic_board = [
         [0, 0, 1, 0, 0, 1, 0, 0],
@@ -202,6 +206,12 @@ def has_lost():
 
 
 def place_ships(win):
+    if is_ai:
+        ai.place_random_ships(ship.length, ally_board)
+        draw_board(ally_board)
+        unicorn.show()
+        return
+
     while (ship.length):
         sleep(0.1)
         key = win.getch()
@@ -234,21 +244,28 @@ def main(win):
     place_ships(win)
 
     while True:
-        sleep(0.1)
-        key = win.getch()
-        unicorn.clear()
-        if key == curses.KEY_DOWN and cursorY < 3:
-            cursorY += 1
-        elif key == curses.KEY_UP and cursorY > 0:
-            cursorY -= 1
-        elif key == curses.KEY_RIGHT and cursorX < 7:
-            cursorX += 1
-        elif key == curses.KEY_LEFT and cursorX > 0:
-            cursorX -= 1
-        elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
+        if not is_ai:
+            sleep(0.1)
+            key = win.getch()
+            unicorn.clear()
+            if key == curses.KEY_DOWN and cursorY < 3:
+                cursorY += 1
+            elif key == curses.KEY_UP and cursorY > 0:
+                cursorY -= 1
+            elif key == curses.KEY_RIGHT and cursorX < 7:
+                cursorX += 1
+            elif key == curses.KEY_LEFT and cursorX > 0:
+                cursorX -= 1
+            elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
+                send_missile()
+            draw_board(enemy_board)
+            unicorn.set_pixel(cursorX,cursorY,255,255,255)
+        elif is_ai and not waiting:
+            sleep(0.5)
+            move = ai.get_move()
+            cursorX = move[1]
+            cursorY = move[0]
             send_missile()
-        draw_board(enemy_board)
-        unicorn.set_pixel(cursorX,cursorY,255,255,255)
 
         if waiting and not waiting_for_rematch:
             draw_board(ally_board)
@@ -262,7 +279,11 @@ def main(win):
 
 
 def init_game():
-    global is_host, enemy_ip, waiting, connection
+    global is_host, enemy_ip, waiting, connection, is_ai
+    if args.ai:
+        args.host = True
+        is_ai = True
+
     if not args.host and not args.ip:
         is_host_input = input("Host? [y/n] ")
         if is_host_input.upper() == "Y":
