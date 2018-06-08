@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import curses
+import sys
 from time import sleep
 from comunication import Connection
 from ship import Ship
@@ -13,13 +14,20 @@ parser.add_argument('--display', action="store_true")
 parser.add_argument('--ai', action="store_true")
 parser.add_argument('--no-display', dest='no_display', action="store_true")
 parser.add_argument('--port', dest='port', type=int, default=5000)
+parser.add_argument('--width', dest='width', type=int, default=8)
+parser.add_argument('--height', dest='height', type=int, default=4)
 
 args = parser.parse_args()
+is_unicorn = False
 try:
     if args.no_display:
         import empty_display as unicorn
     elif not args.display:
         import unicornhat as unicorn
+        is_unicorn = True
+        if args.width > 8 or args.height > 4:
+            print("Unsupported size")
+            exit(2)
     else:
         import display as unicorn
 except ImportError:
@@ -28,20 +36,13 @@ except ImportError:
 unicorn.set_layout(unicorn.PHAT)
 unicorn.rotation(180)
 unicorn.brightness(0.5)
+height = 0
+width = 0
 
-enemy_board = [
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0]
-]
 
-ally_board = [
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0]
-]
+enemy_board = []
+
+ally_board = []
 
 cursorX = 0
 cursorY = 0
@@ -53,46 +54,24 @@ is_ai = False
 waiting = True
 waiting_for_rematch = False
 connection = None
-ship = Ship(3)
-ai = Ai()
+ship = Ship(3, width, height)
+ai = Ai(width, height)
 
-vic_board = [
-        [0, 0, 1, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 1, 0],
-        [0, 0, 1, 1, 1, 1, 0, 0]
-    ]
-
-los_board = [
-        [0, 0, 2, 0, 0, 2, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 2, 2, 2, 2, 0, 0],
-        [0, 2, 0, 0, 0, 0, 2, 0]
-    ]
+vic_board = []
+los_board = []
 
 
 def reset(win):
-    global enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, setup, ship, waiting_for_rematch
-    enemy_board = [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ]
-
-    ally_board = [
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0]
-    ]
+    global ai, enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, ship, waiting_for_rematch, vic_board, los_board
+    enemy_board = [[0 for _ in range(width)] for _ in range(height)]
+    ally_board = [[0 for _ in range(width)] for _ in range(height)]
 
     cursorX = 0
     cursorY = 0
 
     waiting_for_rematch = False
-    ship = Ship(3)
-    ai = Ai()
+    ship = Ship(3, width, height)
+    ai = Ai(width, height)
     place_ships(win)
 
 
@@ -212,7 +191,7 @@ def has_lost():
 
 def place_ships(win):
     if is_ai:
-        ai.place_random_ships(ship.length, ally_board)
+        ai.place_ships(ship.length, ally_board)
         draw_board(ally_board)
         unicorn.show()
         return
@@ -239,9 +218,14 @@ def place_ships(win):
 
 
 def main(win):
-    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, waiting_for_rematch
+    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, waiting_for_rematch, vic_board, los_board
+    enemy_board = [[0 for _ in range(width)] for _ in range(height)]
+    ally_board = [[0 for _ in range(width)] for _ in range(height)]
+    vic_board = [[1 for _ in range(width)] for _ in range(height)]
+    los_board = [[2 for _ in range(width)] for _ in range(height)]
+
     try:
-        unicorn.set_window(win)
+        unicorn.set_window(win, width, height)
     except AttributeError:
         pass
     win.nodelay(True)
@@ -253,21 +237,21 @@ def main(win):
             sleep(0.1)
             key = win.getch()
             unicorn.clear()
-            if key == curses.KEY_DOWN and cursorY < 3:
+            if key == curses.KEY_DOWN and cursorY < height-1:
                 cursorY += 1
             elif key == curses.KEY_UP and cursorY > 0:
                 cursorY -= 1
-            elif key == curses.KEY_RIGHT and cursorX < 7:
+            elif key == curses.KEY_RIGHT and cursorX < width-1:
                 cursorX += 1
             elif key == curses.KEY_LEFT and cursorX > 0:
                 cursorX -= 1
             elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
                 send_missile()
             draw_board(enemy_board)
-            unicorn.set_pixel(cursorX,cursorY,255,255,255)
+            unicorn.set_pixel(cursorX, cursorY, 255, 255, 255)
         elif is_ai and not waiting:
             sleep(0.5)
-            move = ai.get_move()
+            move = ai.get_move(enemy_board)
             cursorX = move[1]
             cursorY = move[0]
             send_missile()
@@ -284,7 +268,7 @@ def main(win):
 
 
 def init_game():
-    global is_host, enemy_ip, waiting, connection, is_ai
+    global is_host, enemy_ip, waiting, connection, is_ai, width, height
     if args.ai:
         is_ai = True
 
@@ -296,6 +280,9 @@ def init_game():
             enemy_ip = input("Enemy ip: ")
     elif args.host:
         is_host = True
+        sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=args.height*3+2, cols=args.width*5+2))
+        height = args.height
+        width = args.width
     elif args.ip:
         enemy_ip = args.ip
     else:
@@ -305,9 +292,24 @@ def init_game():
     if is_host:
         waiting = False
         connection = Connection("0.0.0.0", False, args.port)
+        connection.send_data([width, height])
+        if not connection.receive_data():
+            print("Unsupported size at client")
+            exit(2)
     else:
         try:
             connection = Connection(enemy_ip, True, args.port)
+            res = connection.receive_data()
+
+            if is_unicorn and (res[0] > 8 or res[1] > 4):
+                connection.send_data(False)
+                print("Unsupported size")
+                exit(2)
+            else:
+                connection.send_data(True)
+                width = res[0]
+                height = res[1]
+                sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height * 3 + 2, cols=width * 5 + 2))
         except ConnectionRefusedError:
             print("No host found at: {}".format(enemy_ip))
             exit(2)

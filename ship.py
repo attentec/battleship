@@ -1,6 +1,8 @@
 class Ship:
-    def __init__(self, length):
+    def __init__(self, length, w, h):
         self.length = length
+        self.width = w
+        self.height = h
         self.x = [0,1,2]
         self.y = [0,0,0]
         self.rotation = 0
@@ -35,15 +37,15 @@ class Ship:
         if self.rotation_invalid(new_x, new_y):
             return
 
-        self.rotation =  (self.rotation + 90) % 360
+        self.rotation = (self.rotation + 90) % 360
         self.x = new_x
         self.y = new_y
 
     def rotation_invalid(self, new_x, new_y):
-        return max(new_x[0:self.length]) > 7 or min(new_x[0:self.length]) < 0 or max(new_y[0:self.length]) > 3 or min(new_y[0:self.length]) < 0
+        return max(new_x[0:self.length]) > self.width-1 or min(new_x[0:self.length]) < 0 or max(new_y[0:self.length]) > self.height - 1 or min(new_y[0:self.length]) < 0
 
     def move_right(self):
-        if max(self.x[0:self.length]) == 7:
+        if max(self.x[0:self.length]) == self.width-1:
             return
         self.x[0] += 1
         self.x[1] += 1
@@ -64,7 +66,7 @@ class Ship:
         self.y[2] -= 1
     
     def move_down(self):
-        if max(self.y[0:self.length]) == 3:
+        if max(self.y[0:self.length]) == self.height - 1:
             return
         self.y[0] += 1
         self.y[1] += 1
