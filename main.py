@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
-from time import sleep
-import unicornhat as unicorn
+import argparse
 import sys
 import curses
+from time import sleep
 from comunication import Connection
 from ship import Ship
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--host', action="store_true")
+parser.add_argument('--client', type=str, help='is client', dest='ip', default=None)
+parser.add_argument('--display', action="store_true")
+
+args = parser.parse_args()
+try:
+    if not args.display:
+        import unicornhat as unicorn
+    else:
+        import display as unicorn
+except ImportError:
+    import display as unicorn
 
 unicorn.set_layout(unicorn.PHAT)
 unicorn.rotation(180)
@@ -208,15 +221,16 @@ def place_ships(win):
         draw_board(ally_board)
         ship.draw(unicorn, ally_board)
         unicorn.show()
-        
+
 
 def main(win):
     global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, waiting_for_rematch
 
+    unicorn.set_win(win)
     win.nodelay(True)
 
     place_ships(win)
-    
+
     while True:
         sleep(0.1)
         key = win.getch()
@@ -247,19 +261,16 @@ def main(win):
 
 def init_game():
     global is_host, enemy_ip, waiting, connection
-    if len(sys.argv) == 1:
+    if not args.host and not args.ip:
         is_host_input = input("Host? [y/n] ")
         if is_host_input.upper() == "Y":
             is_host = True
         if not is_host:
             enemy_ip = input("Enemy ip: ")
-    elif len(sys.argv) == 2 and sys.argv[1].lower() == "host":
+    elif args.host:
         is_host = True
-    elif len(sys.argv) == 2 and sys.argv[1].lower() == "client":
-        print("You must provide an ip-address to the host")
-        exit(1)
-    elif len(sys.argv) == 3 and sys.argv[1].lower() == "client":
-        enemy_ip = sys.argv[2]
+    elif args.ip:
+        enemy_ip = args.ip
     else:
         print("Unknown argument provided")
         exit(1)
