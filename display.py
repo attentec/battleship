@@ -71,7 +71,7 @@ def add_border():
         for x in range(0, 8):
             for l in range(1, 5):
                 window.addstr(y * 3, x * 5 + l, "─", curses.color_pair(6))
-    window.addstr(13, 0, " ", curses.color_pair(6))
+    window.addstr(13, 0, " ", curses.color_pair(0))
 
 
 def set_window(win):
