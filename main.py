@@ -6,6 +6,7 @@ from time import sleep
 from comunication import Connection
 from ship import Ship
 from ai import Ai
+from battelship import Battleship
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--host', action="store_true")
@@ -16,190 +17,54 @@ parser.add_argument('--no-display', dest='no_display', action="store_true")
 parser.add_argument('--port', dest='port', type=int, default=5000)
 parser.add_argument('--width', dest='width', type=int, default=8)
 parser.add_argument('--height', dest='height', type=int, default=4)
+parser.add_argument('--ships', nargs='+', help='<Required> Set flag', required=False)
 
 args = parser.parse_args()
 is_unicorn = False
 try:
     if args.no_display:
-        import empty_display as unicorn
+        import empty_display as display
     elif not args.display:
-        import unicornhat as unicorn
+        import unicornhat as display
         is_unicorn = True
         if args.width > 8 or args.height > 4:
             print("Unsupported size")
             exit(2)
     else:
-        import display as unicorn
+        import display as display
 except ImportError:
-    import display as unicorn
+    import display as display
 
-unicorn.set_layout(unicorn.PHAT)
-unicorn.rotation(180)
-unicorn.brightness(0.5)
+display.set_layout(display.PHAT)
+display.rotation(180)
+display.brightness(0.5)
 height = 0
 width = 0
-
-
-enemy_board = []
-
-ally_board = []
+ships = []
 
 cursorX = 0
 cursorY = 0
 
 enemy_ip = ""
-enemy_turn = False
 is_host = False
 is_ai = False
-waiting = True
-waiting_for_rematch = False
+ai = None
 connection = None
-ship = Ship(3, width, height)
-ai = Ai(width, height)
-
-vic_board = []
-los_board = []
-
-
-def reset(win):
-    global ai, enemy_board, ally_board, cursorX, cursorY, enemy_turn, waiting, ship, waiting_for_rematch, vic_board, los_board
-    enemy_board = [[0 for _ in range(width)] for _ in range(height)]
-    ally_board = [[0 for _ in range(width)] for _ in range(height)]
-
-    cursorX = 0
-    cursorY = 0
-
-    waiting_for_rematch = False
-    ship = Ship(3, width, height)
-    ai = Ai(width, height)
-    place_ships(win)
-
-
-def rematch(win):
-    print("Rematch? [y/n] ")
-    while True:
-        sleep(0.1)
-        key = win.getch()
-        if key == 121:
-            print("Waiting for opponent response...")
-            connection.send_data(True)
-            response = connection.receive_data()
-            if response:
-                reset(win)
-                return
-            else:
-                print("Opponent quit")
-                connection.close_connection()
-                sleep(2)
-                exit(0)
-        elif key == 110:
-            connection.send_data(False)
-            connection.close_connection()
-            exit(0)
-
-
-def blink_and_set(board, x, y, value):
-    for i in range(1, 9):
-        board[y][x] = value if i % 2 else 0
-        draw_board(board)
-        unicorn.show()
-        sleep(0.2)
-    board[y][x] = value
-
-
-def get_color(color):
-    """
-    0: black,
-    1: green,
-    2: red,
-    3: blue,
-    other: black
-    :param color: Int representing a color
-    :return: (r, g, b)
-    """
-    if color == 0:
-        return 0, 0, 0
-    elif color == 1:
-        return 0, 255, 0
-    elif color == 2 or color == 4:
-        return 255, 0, 0
-    elif color == 3:
-        return 0, 0, 255
-    else:
-        return 0, 0, 0
-
-
-def draw_board(board):
-    """
-    Draw board on unicorn
-    """
-    for y in range(len(board)):
-        for x in range(len(board[y])):
-            r, g, b = get_color(board[y][x])
-            unicorn.set_pixel(x, y, r, g, b)
-
-
-def send_missile():
-    global cursorX, cursorY, connection, waiting, waiting_for_rematch
-    connection.send_data([cursorY, cursorX])
-    response = connection.receive_data()
-    blink_and_set(enemy_board, cursorX, cursorY, response)
-    if response == 4:
-        draw_board(vic_board)
-        unicorn.show()
-        sleep(4)
-        if is_host:
-            sleep(1)
-        waiting_for_rematch = True
-    enemy_board[cursorY][cursorX] = response
-    waiting = True
-
-
-def await_incoming():
-    global connection, waiting, waiting_for_rematch
-    y, x = connection.receive_data()
-    lost = False
-    if ally_board[y][x] == 1:
-        res = 2
-        ally_board[y][x] = 2
-        lost = has_lost()
-    else:
-        res = 3
-
-    if lost:
-        connection.send_data(4)
-        blink_and_set(ally_board, x, y, res)
-        draw_board(los_board)
-        unicorn.show()
-        sleep(4)
-        if is_host:
-            sleep(2)
-        waiting_for_rematch = True
-    else:
-        connection.send_data(res)
-        blink_and_set(ally_board, x, y, res)
-    waiting = False
-
-
-def has_lost():
-    for y in range(len(ally_board)):
-        for x in range(len(ally_board[y])):
-            if ally_board[y][x] == 1:
-                return False
-    return True
+game = None
 
 
 def place_ships(win):
+    ship = Ship(game.ships, game.width, game.height)
     if is_ai:
-        ai.place_ships(ship.length, ally_board)
-        draw_board(ally_board)
-        unicorn.show()
+        ai.place_ships(ships, game)
+        game.draw_ally_board()
+        display.show()
         return
 
-    while ship.length:
+    while ship.index < len(ships):
         sleep(0.1)
         key = win.getch()
-        unicorn.clear()
+        display.clear()
         if key == curses.KEY_DOWN:
             ship.move_down()
         elif key == curses.KEY_UP:
@@ -211,21 +76,22 @@ def place_ships(win):
         elif key == 114:  # R
             ship.rotate()
         elif key == 32:  # Space
-            ship.place(ally_board)
-        draw_board(ally_board)
-        ship.draw(unicorn, ally_board)
-        unicorn.show()
+            ship.place(game.ally_board)
+        game.draw_ally_board()
+        ship.draw(display, game.ally_board)
+        display.show()
 
 
 def main(win):
-    global cursorX, cursorY, enemy_board, ally_board, enemy_ip, enemy_turn, is_host, waiting, ship, waiting_for_rematch, vic_board, los_board
-    enemy_board = [[0 for _ in range(width)] for _ in range(height)]
-    ally_board = [[0 for _ in range(width)] for _ in range(height)]
-    vic_board = [[1 for _ in range(width)] for _ in range(height)]
-    los_board = [[2 for _ in range(width)] for _ in range(height)]
+    global ai, game, cursorX, cursorY, is_host
+
+    if is_ai:
+        ai = Ai(width, height)
+
+    game = Battleship(height, width, ships, display, connection, is_host)
 
     try:
-        unicorn.set_window(win, width, height)
+        display.set_window(win, width, height)
     except AttributeError:
         pass
     win.nodelay(True)
@@ -236,39 +102,61 @@ def main(win):
         if not is_ai:
             sleep(0.1)
             key = win.getch()
-            unicorn.clear()
-            if key == curses.KEY_DOWN and cursorY < height-1:
+            display.clear()
+            if key == curses.KEY_DOWN and cursorY < height - 1:
                 cursorY += 1
             elif key == curses.KEY_UP and cursorY > 0:
                 cursorY -= 1
-            elif key == curses.KEY_RIGHT and cursorX < width-1:
+            elif key == curses.KEY_RIGHT and cursorX < width - 1:
                 cursorX += 1
             elif key == curses.KEY_LEFT and cursorX > 0:
                 cursorX -= 1
-            elif key == 32 and not waiting and enemy_board[cursorY][cursorX] == 0:  # Space
-                send_missile()
-            draw_board(enemy_board)
-            unicorn.set_pixel(cursorX, cursorY, 255, 255, 255)
-        elif is_ai and not waiting:
+            elif key == 32 and not game.waiting and game.enemy_board[cursorY][cursorX] == 0:  # Space
+                game.send_missile(cursorX, cursorY)
+            game.draw_board(game.enemy_board)
+            display.set_pixel(cursorX, cursorY, 255, 255, 255)
+        elif not game.waiting:
             sleep(0.5)
-            move = ai.get_move(enemy_board)
-            cursorX = move[1]
-            cursorY = move[0]
-            send_missile()
+            move = ai.get_move(game.enemy_board)
+            game.send_missile(move[1], move[0])
 
-        if waiting and not waiting_for_rematch:
-            draw_board(ally_board)
-            unicorn.show()
-            await_incoming()
+        if game.waiting and not game.waiting_for_rematch:
+            game.draw_ally_board()
+            display.show()
+            game.await_incoming()
             curses.flushinp()
 
-        if waiting_for_rematch:
-            rematch(win)
-        unicorn.show()
+        if game.waiting_for_rematch:
+            print("Rematch? [y/n] ")
+            while True:
+                sleep(0.1)
+                key = win.getch()
+                if key == 121:
+                    print("Waiting for opponent response...")
+                    connection.send_data(True)
+                    response = connection.receive_data()
+                    if response:
+                        game.reset()
+                        break
+                    else:
+                        print("Opponent quit")
+                        connection.close_connection()
+                        sleep(2)
+                        exit(0)
+                elif key == 110:
+                    connection.send_data(False)
+                    connection.close_connection()
+                    exit(0)
+            cursorX = 0
+            cursorY = 0
+            if is_ai:
+                ai = Ai(width, height)
+            place_ships(win)
+        display.show()
 
 
 def init_game():
-    global is_host, enemy_ip, waiting, connection, is_ai, width, height
+    global is_host, enemy_ip, connection, is_ai, width, height, ships
     if args.ai:
         is_ai = True
 
@@ -280,9 +168,17 @@ def init_game():
             enemy_ip = input("Enemy ip: ")
     elif args.host:
         is_host = True
-        sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=args.height*3+2, cols=args.width*5+2))
+        sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=args.height * 3 + 2, cols=args.width * 5 + 2))
         height = args.height
         width = args.width
+        if args.ships:
+            try:
+                ships = [int(ship) for ship in args.ships]
+            except ValueError:
+                print("Unknown ship provided")
+                exit(1)
+        else:
+            ships = [3, 2, 1]
     elif args.ip:
         enemy_ip = args.ip
     else:
@@ -290,9 +186,8 @@ def init_game():
         exit(1)
 
     if is_host:
-        waiting = False
         connection = Connection("0.0.0.0", False, args.port)
-        connection.send_data([width, height])
+        connection.send_data([width, height, ships])
         if not connection.receive_data():
             print("Unsupported size at client")
             exit(2)
@@ -309,6 +204,7 @@ def init_game():
                 connection.send_data(True)
                 width = res[0]
                 height = res[1]
+                ships = res[2]
                 sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height * 3 + 2, cols=width * 5 + 2))
         except ConnectionRefusedError:
             print("No host found at: {}".format(enemy_ip))
