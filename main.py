@@ -11,10 +11,13 @@ parser.add_argument('--host', action="store_true")
 parser.add_argument('--client', type=str, help='is client', dest='ip', default=None)
 parser.add_argument('--display', action="store_true")
 parser.add_argument('--ai', action="store_true")
+parser.add_argument('--no-display', dest='no_display', action="store_true")
 
 args = parser.parse_args()
 try:
-    if not args.display:
+    if args.no_display:
+        import empty_display as unicorn
+    elif not args.display:
         import unicornhat as unicorn
     else:
         import display as unicorn
