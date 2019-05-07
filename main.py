@@ -5,19 +5,18 @@ import sys
 from time import sleep
 from comunication import Connection
 from ship import Ship
-from ai import Ai
 from battelship import Battleship
 
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--host', action="store_true")
 parser.add_argument('--client', type=str, help='host ip', dest='ip', default=None)
 parser.add_argument('--display', action="store_true")
-parser.add_argument('--ai', action="store_true")
+parser.add_argument('--ai', dest='ai', type=str, nargs='?', default='not_set')
 parser.add_argument('--no-display', dest='no_display', action="store_true")
 parser.add_argument('--port', dest='port', type=int, default=5000)
 parser.add_argument('--width', dest='width', type=int, default=8)
 parser.add_argument('--height', dest='height', type=int, default=4)
-parser.add_argument('--ships', nargs='+', help='<Required> Set flag', required=False)
+parser.add_argument('-s', '--ships', dest='ships', nargs='*', type=int)
 
 args = parser.parse_args()
 is_unicorn = False
@@ -86,7 +85,8 @@ def main(win):
     global ai, game, cursorX, cursorY, is_host
 
     if is_ai:
-        ai = Ai(width, height)
+        ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
+        ai = ai_module.Ai(width, height)
 
     game = Battleship(height, width, ships, display, connection, is_host)
 
@@ -150,14 +150,15 @@ def main(win):
             cursorX = 0
             cursorY = 0
             if is_ai:
-                ai = Ai(width, height)
+                ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
+                ai = ai_module.Ai(width, height)
             place_ships(win)
         display.show()
 
 
 def init_game():
     global is_host, enemy_ip, connection, is_ai, width, height, ships
-    if args.ai:
+    if args.ai != 'not_set':
         is_ai = True
 
     if not args.host and not args.ip:
