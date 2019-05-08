@@ -119,3 +119,13 @@ class Battleship:
                 if self.ally_board[y][x] == 1:
                     return False
         return True
+
+    def valid_pos(self, ship):
+        for pos in ship:
+            if self.ally_board[pos[1]][pos[0]]:
+                return False
+        return True
+
+    def place_ship(self, ship):
+        for pos in ship:
+            self.ally_board[pos[1]][pos[0]] = 1

@@ -15,19 +15,7 @@ class Ai:
     def get_move(self, enemy_board):
         return self.moves.pop()
 
-    @staticmethod
-    def valid_pos(ship, ally_board):
-        for pos in ship:
-            if ally_board[pos[1]][pos[0]]:
-                return False
-        return True
-
-    @staticmethod
-    def place_ship(ship, ally_board):
-        for pos in ship:
-            ally_board[pos[1]][pos[0]] = 1
-
-    def place_ships(self, ships, game):
+    def place_ships(self, ships, valid_pos, place_ship):
         index = 0
         while index < len(ships):
             rot = random.choice([0, 90])
@@ -41,6 +29,6 @@ class Ai:
 
             ship = [[x+i, y] if rot == 0 else [x, y+i] for i in range(ships[index])]
         
-            if self.valid_pos(ship, game.ally_board):
-                self.place_ship(ship, game.ally_board)
+            if valid_pos(ship):
+                place_ship(ship)
                 index = index + 1
