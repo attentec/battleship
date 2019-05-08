@@ -18,6 +18,12 @@ parser.add_argument('--width', dest='width', type=int, default=8)
 parser.add_argument('--height', dest='height', type=int, default=4)
 parser.add_argument('-s', '--ships', dest='ships', nargs='*', type=int)
 
+KEY_Y = 121
+KEY_N = 110
+KEY_R = 114
+KEY_SPACE = 32
+KEY_ESC = 27
+
 args = parser.parse_args()
 is_unicorn = False
 try:
@@ -72,9 +78,9 @@ def place_ships(win):
             ship.move_right()
         elif key == curses.KEY_LEFT:
             ship.move_left()
-        elif key == 114:  # R
+        elif key == KEY_R:
             ship.rotate()
-        elif key == 32:  # Space
+        elif key == KEY_SPACE:
             ship.place(game.ally_board)
         game.draw_ally_board()
         ship.draw(display, game.ally_board)
@@ -111,8 +117,11 @@ def main(win):
                 cursorX += 1
             elif key == curses.KEY_LEFT and cursorX > 0:
                 cursorX -= 1
-            elif key == 32 and not game.waiting and game.enemy_board[cursorY][cursorX] == 0:  # Space
+            elif key == KEY_SPACE and not game.waiting and game.enemy_board[cursorY][cursorX] == 0:
                 game.send_missile(cursorX, cursorY)
+            elif key == KEY_ESC:
+                connection.close_connection()
+                exit(0)
             game.draw_board(game.enemy_board)
             display.set_pixel(cursorX, cursorY, 255, 255, 255)
         elif not game.waiting:
@@ -131,7 +140,7 @@ def main(win):
             while True:
                 sleep(0.1)
                 key = win.getch()
-                if key == 121:
+                if key == KEY_Y:
                     print("Waiting for opponent response...")
                     connection.send_data(True)
                     response = connection.receive_data()
@@ -143,7 +152,7 @@ def main(win):
                         connection.close_connection()
                         sleep(2)
                         exit(0)
-                elif key == 110:
+                elif key == KEY_N:
                     connection.send_data(False)
                     connection.close_connection()
                     exit(0)
