@@ -61,7 +61,7 @@ game = None
 def place_ships(win):
     ship = Ship(game.ships, game.width, game.height)
     if is_ai:
-        ai.place_ships(ships, game)
+        ai.place_ships(ships, game.valid_pos, game.place_ship)
         game.draw_ally_board()
         display.show()
         return
