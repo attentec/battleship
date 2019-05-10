@@ -1,22 +1,48 @@
 #!/usr/bin/env python3
-import argparse
+"""Main entry point for the Battleship game."""
 import curses
 import sys
+from argparse import ArgumentParser, RawTextHelpFormatter
 from time import sleep
-from comunication import Connection
-from ship import Ship
+
 from battelship import Battleship
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--host', action="store_true")
-parser.add_argument('--client', type=str, help='host ip', dest='ip', default=None)
-parser.add_argument('--display', action="store_true")
-parser.add_argument('--ai', dest='ai', type=str, nargs='?', default='not_set')
-parser.add_argument('--no-display', dest='no_display', action="store_true")
-parser.add_argument('--port', dest='port', type=int, default=5000)
-parser.add_argument('--width', dest='width', type=int, default=8)
-parser.add_argument('--height', dest='height', type=int, default=4)
-parser.add_argument('-s', '--ships', dest='ships', nargs='*', type=int)
+from comunication import Connection
+
+from ship import Ship
+
+parser = ArgumentParser(
+    description='The game of Battleship\n\n'
+                'Rules:\n'
+                'Before play begins, each player secretly arranges their ships on their primary\n'
+                'grid.\n'
+                'Each ship occupies a number of consecutive squares on the grid, arranged\n'
+                'either horizontally or vertically.\n'
+                'The number of squares for each ship is determined by the type of the ship.\n'
+                'The ships cannot overlap, only one ship can occupy a given square in the grid.\n'
+                'The types and numbers of ships allowed are the same for each player.\n'
+                'After the ships have been positioned, the game proceeds in a series of rounds.\n'
+                'In each round, each player takes a turn to announce a target square in the\n'
+                'opponent\'s grid which is to be shot at.\n'
+                'The opponent announces whether or not the square is occupied by a ship.\n'
+                'If all of a player\'s ships have been sunk, their opponent wins.\n'
+                '', formatter_class=RawTextHelpFormatter)
+
+parser.add_argument('--host', help="Start as host", action="store_true")
+parser.add_argument('--client', type=str, help='Start as client and connect to host ip', dest='ip', default=None)
+parser.add_argument('--display', help="Run with terminal as display.", action="store_true")
+parser.add_argument('--ai',
+                    help="AI instead of human player.\n"
+                         "Provide a file name to including the ai or leave blank\n"
+                         "to use the default implementation.",
+                    dest='ai', type=str, nargs='?', default='not_set')
+parser.add_argument('--no-display', help="Run game without an display, useful for debugging.",
+                    dest='no_display', action="store_true")
+parser.add_argument('--port', help="Port to connect to on the remote host.", dest='port', type=int, default=5000)
+parser.add_argument('--width', help="Width of game plan.", dest='width', type=int, default=8)
+parser.add_argument('--height', help="Height of game plan.", dest='height', type=int, default=4)
+parser.add_argument('--ships', help="Specify the ships wanted.\n"
+                                    "Default: --ships 3 2 1", dest='ships', nargs='*', type=int)
 
 KEY_Y = 121
 KEY_N = 110
@@ -31,14 +57,15 @@ try:
         import empty_display as display
     elif not args.display:
         import unicornhat as display
+
         is_unicorn = True
         if args.width > 8 or args.height > 4:
             print("Unsupported size")
             exit(2)
     else:
-        import display as display
+        import display
 except ImportError:
-    import display as display
+    import display
 
 display.set_layout(display.PHAT)
 display.rotation(180)
@@ -47,8 +74,8 @@ height = 0
 width = 0
 ships = []
 
-cursorX = 0
-cursorY = 0
+cursor_x = 0
+cursor_y = 0
 
 enemy_ip = ""
 is_host = False
@@ -59,6 +86,12 @@ game = None
 
 
 def place_ships(win):
+    """
+    Place ships.
+
+    :param win: Window
+    :return: None
+    """
     ship = Ship(game.ships, game.width, game.height)
     if is_ai:
         ai.place_ships(ships, game.valid_pos, game.place_ship)
@@ -88,11 +121,17 @@ def place_ships(win):
 
 
 def main(win):
-    global ai, game, cursorX, cursorY, is_host
+    """
+    Game loop function.
+
+    :param win: Window
+    :return: None
+    """
+    global ai, game, cursor_x, cursor_y, is_host
 
     if is_ai:
         ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
-        ai = ai_module.Ai(width, height)
+        ai = ai_module.Ai(width, height, display.PHAT)
 
     game = Battleship(height, width, ships, display, connection, is_host)
 
@@ -109,21 +148,21 @@ def main(win):
             sleep(0.1)
             key = win.getch()
             display.clear()
-            if key == curses.KEY_DOWN and cursorY < height - 1:
-                cursorY += 1
-            elif key == curses.KEY_UP and cursorY > 0:
-                cursorY -= 1
-            elif key == curses.KEY_RIGHT and cursorX < width - 1:
-                cursorX += 1
-            elif key == curses.KEY_LEFT and cursorX > 0:
-                cursorX -= 1
-            elif key == KEY_SPACE and not game.waiting and game.enemy_board[cursorY][cursorX] == 0:
-                game.send_missile(cursorX, cursorY)
+            if key == curses.KEY_DOWN and cursor_y < height - 1:
+                cursor_y += 1
+            elif key == curses.KEY_UP and cursor_y > 0:
+                cursor_y -= 1
+            elif key == curses.KEY_RIGHT and cursor_x < width - 1:
+                cursor_x += 1
+            elif key == curses.KEY_LEFT and cursor_x > 0:
+                cursor_x -= 1
+            elif key == KEY_SPACE and not game.waiting and game.enemy_board[cursor_y][cursor_x] == 0:
+                game.send_missile(cursor_x, cursor_y)
             elif key == KEY_ESC:
                 connection.close_connection()
                 exit(0)
             game.draw_board(game.enemy_board)
-            display.set_pixel(cursorX, cursorY, 255, 255, 255)
+            display.set_pixel(cursor_x, cursor_y, 255, 255, 255)
         elif not game.waiting:
             sleep(0.5)
             move = ai.get_move(game.enemy_board)
@@ -156,16 +195,17 @@ def main(win):
                     connection.send_data(False)
                     connection.close_connection()
                     exit(0)
-            cursorX = 0
-            cursorY = 0
+            cursor_x = 0
+            cursor_y = 0
             if is_ai:
                 ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
-                ai = ai_module.Ai(width, height)
+                ai = ai_module.Ai(width, height, display.PHAT)
             place_ships(win)
         display.show()
 
 
 def init_game():
+    """Initialize connections and start the game."""
     global is_host, enemy_ip, connection, is_ai, width, height, ships
     if args.ai != 'not_set':
         is_ai = True
@@ -217,7 +257,7 @@ def init_game():
                 ships = res[2]
                 sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height * 3 + 2, cols=width * 5 + 2))
         except ConnectionRefusedError:
-            print("No host found at: {}".format(enemy_ip))
+            print("No host found at: {ip}".format(ip=enemy_ip))
             exit(2)
         except OSError:
             print("Invalid ip-address.")

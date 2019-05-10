@@ -1,3 +1,4 @@
+"""Implementation of the display interface that draws in the terminal window."""
 import curses
 
 PHAT = 0
@@ -7,23 +8,37 @@ height = 0
 
 
 def set_layout(layout):
+    """Do nothing, just here to implement the display interface."""
     pass
 
 
 def rotation(degree):
+    """Do nothing, just here to implement the display interface."""
     pass
 
 
 def brightness(percent):
+    """Do nothing, just here to implement the display interface."""
     pass
 
 
 def clear():
+    """Clear the window."""
     global window
     window.clear()
 
 
 def set_pixel(x, y, r, g, b):
+    """
+    Set color of pixel.
+
+    :param x: X coordinate
+    :param y: Y coordinate
+    :param r: Red
+    :param g: Green
+    :param b: Blue
+    :return: None
+    """
     global window
     color = 1
     if r == 255 and g == 255 and b == 255:
@@ -45,12 +60,14 @@ def set_pixel(x, y, r, g, b):
 
 
 def show():
+    """Show pixels on display."""
     global window
     add_border()
     window.refresh()
 
 
 def add_border():
+    """Add border to display."""
     global window
     window.addstr(0, 0, "┌", curses.color_pair(6))
     window.addstr(height * 3, 0, "└", curses.color_pair(6))
@@ -77,6 +94,7 @@ def add_border():
 
 
 def set_window(win, w, h):
+    """Set initial values to be used in displaying."""
     global window, width, height
     width = w
     height = h

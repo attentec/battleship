@@ -1,8 +1,30 @@
 # Battleship
 This is a game of Battleship played over a network.
-The game can be executed on a Raspberry pi with a 4 x 8 Unicorn pHAT or in a terminal.
 
-## Instructions
+Start the game by running main.py.
+
+## Instructions for writing a AI
+
+Start by making a copy of the `ai.py` file.
+Improve the ai by implementing smarter functions to make it perform better in the game of battleship.
+
+### Test your implementation
+Open 2 terminals and in the first run:
+
+Change the `<first ai>` to the name of the `ai` python file you want to try.
+
+`python3 main.py --host --ships 5 4 4 3 3 3  --width 13 --heigh 13 --ai <first ai>`
+
+In the second terminal run:
+
+Change the `<ip>` to that displayed in the first terminal.
+Change the `<second ai>` to the name of the `ai` python file you want to run your first ai against, it could be the same ai.
+
+`python3 main.py --display --client <ip> --ai <second ai>`
+
+
+## Instructions of use
+The game can be executed on a Raspberry pi with a 4 x 8 Unicorn pHAT or in a terminal.
 To run this game on a Raspberry Pi with a Unicorn pHAT the script must be run as root and the [unicorn-hat](https://github.com/pimoroni/unicorn-hat) package installed .
 
 Execute the `main.py` to start the game.
