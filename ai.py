@@ -1,42 +1,63 @@
+"""File containing the AI."""
 import random
 
+
 class Ai:
-    def __init__(self):
-        self.moves = [
-            [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7],
-            [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7],
-            [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7],
-            [3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7]
-        ]
+    """Basic example of a battleship AI."""
+
+    def __init__(self, width, height, display):
+        """
+        Initialize the AI providing the width, height and what display is used.
+
+        :param width: Width of the game plan
+        :param height: Height of the game plan
+        :param display: -1 = no display, 0 = terminal, other = RPI
+        """
+        self.moves = []
+        for y in range(height):
+            for x in range(width):
+                self.moves.append([y, x])
+        self.width = width
+        self.height = height
+        self.enable_logging = False
+        if display == -1:
+            self.enable_logging = True
 
         random.shuffle(self.moves)
 
-    def get_move(self):
+    def get_move(self, enemy_board):
+        """
+        Get next coordinates to fire at the opponent at.
+
+        :param enemy_board: The known data about the enemy board.
+        :return: The coordinates to fire at as a list [y, x]
+        """
+        if self.enable_logging:
+            print(enemy_board)
         return self.moves.pop()
 
-    def valid_pos(self, ship, ally_board):
-        for pos in ship:
-            if ally_board[pos[1]][pos[0]]:
-                return False
-        return True
+    def place_ships(self, ships, valid_pos, place_ship):
+        """
+        Place the ships.
 
-    def place_ship(self, ship, ally_board):
-        for pos in ship:
-            ally_board[pos[1]][pos[0]] = 1
-
-    def place_random_ships(self, len, ally_board):
-        while len > 0:
-            rot = random.choice([0,90])
+        :param ships: List of ship length to place
+        :param valid_pos: Function to validate that the position is valid.
+        :param place_ship: Function to place the ship.
+        :return:
+        """
+        index = 0
+        while index < len(ships):
+            rot = random.choice([0, 90])
 
             if rot == 0:
-                x = random.randint(0,8-len)
-                y = random.randint(0,3)
+                x = random.randint(0, self.width - ships[index])
+                y = random.randint(0, self.height - 1)
             else:
-                x = random.randint(0,7)
-                y = random.randint(0,4-len)
+                x = random.randint(0, self.width - 1)
+                y = random.randint(0, self.height - ships[index])
 
-            ship = [[x+i,y] if rot == 0 else [x,y+i] for i in range(len)]
-        
-            if self.valid_pos(ship, ally_board):
-                self.place_ship(ship, ally_board)
-                len = len - 1
+            ship = [[x + i, y] if rot == 0 else [x, y + i] for i in range(ships[index])]
+
+            if valid_pos(ship):
+                place_ship(ship)
+                index = index + 1

@@ -1,27 +1,44 @@
+"""Implementation of the display interface that draws in the terminal window."""
 import curses
 
 PHAT = 0
 window = None
+width = 0
+height = 0
 
 
 def set_layout(layout):
+    """Do nothing, just here to implement the display interface."""
     pass
 
 
 def rotation(degree):
+    """Do nothing, just here to implement the display interface."""
     pass
 
 
 def brightness(percent):
+    """Do nothing, just here to implement the display interface."""
     pass
 
 
 def clear():
+    """Clear the window."""
     global window
     window.clear()
 
 
 def set_pixel(x, y, r, g, b):
+    """
+    Set color of pixel.
+
+    :param x: X coordinate
+    :param y: Y coordinate
+    :param r: Red
+    :param g: Green
+    :param b: Blue
+    :return: None
+    """
     global window
     color = 1
     if r == 255 and g == 255 and b == 255:
@@ -43,39 +60,44 @@ def set_pixel(x, y, r, g, b):
 
 
 def show():
+    """Show pixels on display."""
     global window
     add_border()
     window.refresh()
 
 
 def add_border():
+    """Add border to display."""
     global window
     window.addstr(0, 0, "┌", curses.color_pair(6))
-    window.addstr(12, 0, "└", curses.color_pair(6))
-    window.addstr(0, 40, "┐", curses.color_pair(6))
-    window.addstr(12, 40, "┘", curses.color_pair(6))
-    for x in range(0,9):
-        if x != 0 and x != 8:
+    window.addstr(height * 3, 0, "└", curses.color_pair(6))
+    window.addstr(0, width * 5, "┐", curses.color_pair(6))
+    window.addstr(height * 3, width * 5, "┘", curses.color_pair(6))
+    for x in range(0, width + 1):
+        if x != 0 and x != width:
             window.addstr(0, x * 5, "┬", curses.color_pair(6))
-            window.addstr(12, x * 5, "┴", curses.color_pair(6))
-        for y in range(1,12):
+            window.addstr(height * 3, x * 5, "┴", curses.color_pair(6))
+        for y in range(1, height * 3):
             if x == 0 and y % 3 == 0:
                 window.addstr(y, x * 5, "├", curses.color_pair(6))
-            elif x == 8 and y % 3 == 0:
+            elif x == width and y % 3 == 0:
                 window.addstr(y, x * 5, "┤", curses.color_pair(6))
             elif y % 3 == 0:
                 window.addstr(y, x * 5, "┼", curses.color_pair(6))
             else:
                 window.addstr(y, x * 5, "│", curses.color_pair(6))
-    for y in range(0, 5):
-        for x in range(0, 8):
+    for y in range(0, height + 1):
+        for x in range(0, width):
             for l in range(1, 5):
                 window.addstr(y * 3, x * 5 + l, "─", curses.color_pair(6))
-    window.addstr(13, 0, " ", curses.color_pair(0))
+    window.addstr(height * 3 + 1, 0, " ", curses.color_pair(0))
 
 
-def set_window(win):
-    global window
+def set_window(win, w, h):
+    """Set initial values to be used in displaying."""
+    global window, width, height
+    width = w
+    height = h
     window = win
     curses.start_color()
     curses.use_default_colors()

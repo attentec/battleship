@@ -1,0 +1,16 @@
+entrypoints==0.3
+flake8==3.7.7
+mccabe==0.6.1
+pycodestyle==2.5.0
+pyflakes==2.1.1
+flake8-bugbear
+flake8-commas
+flake8-builtins
+flake8-comprehensions
+flake8-string-format
+flake8-strict
+pep8-naming
+flake8-import-order
+flake8-tidy-imports
+flake8-bandit
+flake8-docstrings
