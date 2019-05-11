@@ -14,14 +14,12 @@ class Ai:
         :param display: -1 = no display, 0 = terminal, other = RPI
         """
         self.moves = []
-        for y in range(height):
-            for x in range(width):
-                self.moves.append([y, x])
+        for row in range(height):
+            for col in range(width):
+                self.moves.append([row, col])
         self.width = width
         self.height = height
         self.enable_logging = False
-        if display == -1:
-            self.enable_logging = True
 
         random.shuffle(self.moves)
 
@@ -30,7 +28,11 @@ class Ai:
         Get next coordinates to fire at the opponent at.
 
         :param enemy_board: The known data about the enemy board.
-        :return: The coordinates to fire at as a list [y, x]
+            Represented as a list of rows that is represented as lists containing a value for each cell:
+                0 = Unknown,
+                2 = Hit,
+                3 = Miss,
+        :return: The coordinates to fire at as a list [row, column]
         """
         if self.enable_logging:
             print(enemy_board)
@@ -40,9 +42,10 @@ class Ai:
         """
         Place the ships.
 
-        :param ships: List of ship length to place
+        :param ships: List of ship lengths to place
         :param valid_pos: Function to validate that the position is valid.
         :param place_ship: Function to place the ship.
+            A ship is represented as a list of tuples with x, y coordinates, ex: [[1, 2], [1, 3], [1, 4]]
         :return:
         """
         index = 0

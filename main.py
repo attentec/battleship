@@ -45,6 +45,8 @@ parser.add_argument('--width', help="Width of game plan.", dest='width', type=in
 parser.add_argument('--height', help="Height of game plan.", dest='height', type=int, default=4)
 parser.add_argument('--ships', help="Specify the ships wanted.\n"
                                     "Default: --ships 3 2 1", dest='ships', nargs='*', type=int)
+parser.add_argument('--speed',
+                    help="Speed up the animation between each turn by this factor.", dest='speed', type=int, default=1)
 
 KEY_Y = 121
 KEY_N = 110
@@ -135,7 +137,7 @@ def main(win):
         ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
         ai = ai_module.Ai(width, height, display.PHAT)
 
-    game = Battleship(height, width, ships, display, connection, is_host, is_unicorn)
+    game = Battleship(height, width, ships, display, connection, is_host, is_unicorn, args.speed)
 
     try:
         display.set_window(win, width, height)

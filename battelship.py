@@ -7,7 +7,7 @@ from CustomErrors import CheatingDetected
 class Battleship:
     """Game mechanics class."""
 
-    def __init__(self, height, width, ships, display, connection, is_host, is_unicorn):
+    def __init__(self, height, width, ships, display, connection, is_host, is_unicorn, speed=1):
         """
         Initialize a game of battleship.
 
@@ -35,6 +35,7 @@ class Battleship:
         self.enemy_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.ally_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.placement_call_count = 0
+        self.speed = speed
 
     @staticmethod
     def get_color(color):
@@ -103,7 +104,7 @@ class Battleship:
             board1[y][x] = value if i % 2 else 0
             self.draw_board(board1, offset2)
             self.display.show()
-            sleep(0.2)
+            sleep(0.2 / self.speed)
         board1[y][x] = value
 
     def send_missile(self, x, y):
@@ -119,9 +120,9 @@ class Battleship:
             self.draw_victory_board()
             self.print_message('You won!')
             self.display.show()
-            sleep(3)
+            sleep(3 / self.speed)
             if self.is_host:
-                sleep(1)
+                sleep(1 / self.speed)
             self.waiting_for_rematch = True
             self.enemy_board[y][x] = response
         self.waiting = True
@@ -148,9 +149,9 @@ class Battleship:
             self.draw_loser_board()
             self.print_message('You lost!')
             self.display.show()
-            sleep(3)
+            sleep(3 / self.speed)
             if self.is_host:
-                sleep(2)
+                sleep(2 / self.speed)
             self.waiting_for_rematch = True
         else:
             self.connection.send_data(res)
@@ -214,4 +215,4 @@ class Battleship:
 
     def ships_are_placed(self):
         """Check if ships are placed."""
-        return len(self.ships) == self.placement_call_count + 1
+        return len(self.ships) == self.placement_call_count
