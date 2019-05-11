@@ -40,3 +40,17 @@ To run the game in terminal run with `--display` or in an environment without un
 To run a game without a display, useful when playing against the AI, run with `--no-display`.
 
 The default port is 5000 but can be changed by providing a number to `--port=<port nr>`
+
+## Controls
+**Arrow keys** — Move cursor/ship.
+
+**Space** — Send missile/place ship.
+
+**R** — Rotate ship during placement.
+
+**Esc** — Quit the game. Only possible during your turn.
+
+## Runing on windows
+Install Python 3 for Windows
+
+Install curses with the following command: `python -m pip install windows-curses`

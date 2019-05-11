@@ -59,38 +59,43 @@ def set_pixel(x, y, r, g, b):
     window.addstr(y * 3 + 2, x * 5 + 4, "█", curses.color_pair(color))
 
 
+def draw_text(message):
+    global window, height    
+    window.addstr(height * 3 * 2 + 6, 0, message, curses.color_pair(6))
+
 def show():
     """Show pixels on display."""
-    global window
+    global window, height
     add_border()
+    add_border(height * 3 + 3)
     window.refresh()
 
 
-def add_border():
+def add_border(offest = 0):
     """Add border to display."""
     global window
-    window.addstr(0, 0, "┌", curses.color_pair(6))
-    window.addstr(height * 3, 0, "└", curses.color_pair(6))
-    window.addstr(0, width * 5, "┐", curses.color_pair(6))
-    window.addstr(height * 3, width * 5, "┘", curses.color_pair(6))
+    window.addstr(offest, 0, "┌", curses.color_pair(6))
+    window.addstr(offest + height * 3, 0, "└", curses.color_pair(6))
+    window.addstr(offest, width * 5, "┐", curses.color_pair(6))
+    window.addstr(offest + height * 3, width * 5, "┘", curses.color_pair(6))
     for x in range(0, width + 1):
         if x != 0 and x != width:
-            window.addstr(0, x * 5, "┬", curses.color_pair(6))
-            window.addstr(height * 3, x * 5, "┴", curses.color_pair(6))
+            window.addstr(offest, x * 5, "┬", curses.color_pair(6))
+            window.addstr(offest + height * 3, x * 5, "┴", curses.color_pair(6))
         for y in range(1, height * 3):
             if x == 0 and y % 3 == 0:
-                window.addstr(y, x * 5, "├", curses.color_pair(6))
+                window.addstr(offest + y, x * 5, "├", curses.color_pair(6))
             elif x == width and y % 3 == 0:
-                window.addstr(y, x * 5, "┤", curses.color_pair(6))
+                window.addstr(offest + y, x * 5, "┤", curses.color_pair(6))
             elif y % 3 == 0:
-                window.addstr(y, x * 5, "┼", curses.color_pair(6))
+                window.addstr(offest + y, x * 5, "┼", curses.color_pair(6))
             else:
-                window.addstr(y, x * 5, "│", curses.color_pair(6))
+                window.addstr(offest + y, x * 5, "│", curses.color_pair(6))
     for y in range(0, height + 1):
         for x in range(0, width):
             for l in range(1, 5):
-                window.addstr(y * 3, x * 5 + l, "─", curses.color_pair(6))
-    window.addstr(height * 3 + 1, 0, " ", curses.color_pair(0))
+                window.addstr(offest + y * 3, x * 5 + l, "─", curses.color_pair(6))
+    window.addstr(offest + height * 3 + 1, 0, " ", curses.color_pair(0))
 
 
 def set_window(win, w, h):
