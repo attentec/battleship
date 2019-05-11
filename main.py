@@ -63,7 +63,7 @@ try:
             print("Unsupported size")
             exit(2)
     else:
-        import display
+        import display        
 except ImportError:
     import display
 
@@ -127,13 +127,13 @@ def main(win):
     :param win: Window
     :return: None
     """
-    global ai, game, cursor_x, cursor_y, is_host
+    global ai, game, cursor_x, cursor_y, is_host, is_unicorn
 
     if is_ai:
         ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
         ai = ai_module.Ai(width, height, display.PHAT)
 
-    game = Battleship(height, width, ships, display, connection, is_host)
+    game = Battleship(height, width, ships, display, connection, is_host, is_unicorn)
 
     try:
         display.set_window(win, width, height)
@@ -161,7 +161,11 @@ def main(win):
             elif key == KEY_ESC:
                 connection.close_connection()
                 exit(0)
-            game.draw_board(game.enemy_board)
+
+            if is_unicorn:
+                game.draw_enemy_board()
+            else:
+                game.draw_both_boards()
             display.set_pixel(cursor_x, cursor_y, 255, 255, 255)
         elif not game.waiting:
             sleep(0.5)
@@ -169,25 +173,28 @@ def main(win):
             game.send_missile(move[1], move[0])
 
         if game.waiting and not game.waiting_for_rematch:
-            game.draw_ally_board()
+            if is_unicorn:
+                game.draw_ally_board()
+            else:
+                game.draw_both_boards()
             display.show()
             game.await_incoming()
             curses.flushinp()
 
         if game.waiting_for_rematch:
-            print("Rematch? [y/n] ")
+            game.print_message("Rematch? [y/n] ")
             while True:
                 sleep(0.1)
                 key = win.getch()
                 if key == KEY_Y:
-                    print("Waiting for opponent response...")
+                    game.print_message("Waiting for opponent response...")
                     connection.send_data(True)
                     response = connection.receive_data()
                     if response:
                         game.reset()
                         break
                     else:
-                        print("Opponent quit")
+                        game.print_message("Opponent quit")
                         connection.close_connection()
                         sleep(2)
                         exit(0)

@@ -30,3 +30,7 @@ def set_pixel(x, y, r, g, b):
 def show():
     """Do nothing, just here to implement the display interface."""
     pass
+
+def draw_text(message)::
+    """Do nothing, just here to implement the display interface."""
+    pass
