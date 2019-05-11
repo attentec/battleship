@@ -39,7 +39,6 @@ def set_pixel(x, y, r, g, b):
     :param b: Blue
     :return: None
     """
-    global window
     color = 1
     if r == 255 and g == 255 and b == 255:
         color = 2
@@ -49,19 +48,24 @@ def set_pixel(x, y, r, g, b):
         color = 4
     elif b == 255:
         color = 5
-    window.addstr(y * 3 + 1, x * 5 + 1, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 1, x * 5 + 2, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 1, x * 5 + 3, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 1, x * 5 + 4, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 2, x * 5 + 1, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 2, x * 5 + 2, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 2, x * 5 + 3, "█", curses.color_pair(color))
-    window.addstr(y * 3 + 2, x * 5 + 4, "█", curses.color_pair(color))
+    try:
+        safe_addstr(y * 3 + 1, x * 5 + 1, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 1, x * 5 + 2, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 1, x * 5 + 3, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 1, x * 5 + 4, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 2, x * 5 + 1, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 2, x * 5 + 2, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 2, x * 5 + 3, "█", curses.color_pair(color))
+        safe_addstr(y * 3 + 2, x * 5 + 4, "█", curses.color_pair(color))
+    except curses.error:
+        pass
 
 
 def draw_text(message):
-    global window, height    
-    window.addstr(height * 3 * 2 + 6, 0, message, curses.color_pair(6))
+    """Draw text."""
+    global height
+    safe_addstr(height * 3 * 2 + 6, 0, message, curses.color_pair(6))
+
 
 def show():
     """Show pixels on display."""
@@ -71,31 +75,30 @@ def show():
     window.refresh()
 
 
-def add_border(offest = 0):
+def add_border(offset=0):
     """Add border to display."""
-    global window
-    window.addstr(offest, 0, "┌", curses.color_pair(6))
-    window.addstr(offest + height * 3, 0, "└", curses.color_pair(6))
-    window.addstr(offest, width * 5, "┐", curses.color_pair(6))
-    window.addstr(offest + height * 3, width * 5, "┘", curses.color_pair(6))
+    safe_addstr(offset, 0, "┌", curses.color_pair(6))
+    safe_addstr(offset + height * 3, 0, "└", curses.color_pair(6))
+    safe_addstr(offset, width * 5, "┐", curses.color_pair(6))
+    safe_addstr(offset + height * 3, width * 5, "┘", curses.color_pair(6))
     for x in range(0, width + 1):
         if x != 0 and x != width:
-            window.addstr(offest, x * 5, "┬", curses.color_pair(6))
-            window.addstr(offest + height * 3, x * 5, "┴", curses.color_pair(6))
+            safe_addstr(offset, x * 5, "┬", curses.color_pair(6))
+            safe_addstr(offset + height * 3, x * 5, "┴", curses.color_pair(6))
         for y in range(1, height * 3):
             if x == 0 and y % 3 == 0:
-                window.addstr(offest + y, x * 5, "├", curses.color_pair(6))
+                safe_addstr(offset + y, x * 5, "├", curses.color_pair(6))
             elif x == width and y % 3 == 0:
-                window.addstr(offest + y, x * 5, "┤", curses.color_pair(6))
+                safe_addstr(offset + y, x * 5, "┤", curses.color_pair(6))
             elif y % 3 == 0:
-                window.addstr(offest + y, x * 5, "┼", curses.color_pair(6))
+                safe_addstr(offset + y, x * 5, "┼", curses.color_pair(6))
             else:
-                window.addstr(offest + y, x * 5, "│", curses.color_pair(6))
+                safe_addstr(offset + y, x * 5, "│", curses.color_pair(6))
     for y in range(0, height + 1):
         for x in range(0, width):
             for l in range(1, 5):
-                window.addstr(offest + y * 3, x * 5 + l, "─", curses.color_pair(6))
-    window.addstr(offest + height * 3 + 1, 0, " ", curses.color_pair(0))
+                safe_addstr(offset + y * 3, x * 5 + l, "─", curses.color_pair(6))
+    safe_addstr(offset + height * 3 + 1, 0, " ", curses.color_pair(0))
 
 
 def set_window(win, w, h):
@@ -113,3 +116,12 @@ def set_window(win, w, h):
     curses.init_pair(4, curses.COLOR_GREEN, curses.COLOR_GREEN)
     curses.init_pair(5, curses.COLOR_BLUE, curses.COLOR_BLUE)
     curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLACK)
+
+
+def safe_addstr(y, x, string, color):
+    """Draw string in terminal without crashing on a too small window."""
+    global window
+    try:
+        window.addstr(y, x, string, color)
+    except curses.error:
+        pass

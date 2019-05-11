@@ -1,8 +1,12 @@
 """File containing the game mechanics of the battleship game."""
 from time import sleep
 
+from CustomErrors import CheatingDetected
+
 
 class Battleship:
+    """Game mechanics class."""
+
     def __init__(self, height, width, ships, display, connection, is_host, is_unicorn):
         """
         Initialize a game of battleship.
@@ -30,6 +34,7 @@ class Battleship:
         self.waiting_for_rematch = False
         self.enemy_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.ally_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
+        self.placement_call_count = 0
 
     @staticmethod
     def get_color(color):
@@ -56,12 +61,12 @@ class Battleship:
         else:
             return 0, 0, 0
 
-    def draw_board(self, board, offest = 0):
+    def draw_board(self, board, offset=0):
         """Draw board on the display."""
         for y in range(len(board)):
             for x in range(len(board[y])):
                 r, g, b = self.get_color(board[y][x])
-                self.display.set_pixel(x, y + offest, r, g, b)
+                self.display.set_pixel(x, y + offset, r, g, b)
 
     def draw_ally_board(self):
         """Draw the players board."""
@@ -90,7 +95,7 @@ class Battleship:
         self.ally_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.waiting_for_rematch = False
 
-    def blink_and_set(self, board1, x, y, value, board2, offset1 = 0, offset2 = 0):
+    def blink_and_set(self, board1, x, y, value, board2, offset1=0, offset2=0):
         """Blink and set the pixel at x, y on the provided board with the given value."""
         for i in range(1, 6):
             if not self.is_unicorn:
@@ -140,7 +145,7 @@ class Battleship:
                 self.draw_enemy_board()
                 self.blink_and_set(self.ally_board, x, y, res, self.enemy_board, 0, self.height + 1)
 
-            self.draw_loser_board()            
+            self.draw_loser_board()
             self.print_message('You lost!')
             self.display.show()
             sleep(3)
@@ -166,7 +171,23 @@ class Battleship:
         return True
 
     def valid_pos(self, ship):
-        """Check if the ship position is a valid position."""
+        """Check if the ship and position is valid."""
+        if self.ships[self.placement_call_count] != len(ship):
+            return False
+        if len(ship) >= 2:
+            if ship[0][0] == ship[1][0]:
+                i = 0
+                for pos in ship:
+                    if ship[0][0] != pos[0] or (ship[0][1] + i) != pos[1]:
+                        return False
+                    i += 1
+            else:
+                i = 0
+                for pos in ship:
+                    if ship[0][1] != pos[1] or (ship[0][0] + i) != pos[0]:
+                        return False
+                    i += 1
+
         for pos in ship:
             if self.ally_board[pos[1]][pos[0]]:
                 return False
@@ -174,11 +195,23 @@ class Battleship:
 
     def place_ship(self, ship):
         """Place ship on ally board."""
-        for pos in ship:
-            self.ally_board[pos[1]][pos[0]] = 1
+        if self.ships[self.placement_call_count] == len(ship):
+            if self.valid_pos(ship):
+                for pos in ship:
+                    self.ally_board[pos[1]][pos[0]] = 1
+                self.placement_call_count += 1
+            else:
+                raise CheatingDetected('Tried to place an invalid ship')
+        else:
+            raise CheatingDetected('Tried to place an incorrect ship')
 
     def print_message(self, message):
+        """Print message."""
         if self.is_unicorn:
             print(message)
         else:
             self.display.draw_text(message)
+
+    def ships_are_placed(self):
+        """Check if ships are placed."""
+        return len(self.ships) == self.placement_call_count + 1

@@ -5,6 +5,8 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from time import sleep
 
+from CustomErrors import CheatingDetected
+
 from battelship import Battleship
 
 from comunication import Connection
@@ -63,7 +65,7 @@ try:
             print("Unsupported size")
             exit(2)
     else:
-        import display        
+        import display
 except ImportError:
     import display
 
@@ -114,7 +116,7 @@ def place_ships(win):
         elif key == KEY_R:
             ship.rotate()
         elif key == KEY_SPACE:
-            ship.place(game.ally_board)
+            ship.place(game.place_ship)
         game.draw_ally_board()
         ship.draw(display, game.ally_board)
         display.show()
@@ -142,6 +144,9 @@ def main(win):
     win.nodelay(True)
 
     place_ships(win)
+
+    if not game.ships_are_placed():
+        raise CheatingDetected('Ships not placed.')
 
     while True:
         if not is_ai:
@@ -225,7 +230,7 @@ def init_game():
             enemy_ip = input("Enemy ip: ")
     elif args.host:
         is_host = True
-        sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=args.height * 3 + 2, cols=args.width * 5 + 2))
+        sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=args.height * 6 + 5, cols=args.width * 5 + 2))
         height = args.height
         width = args.width
         if args.ships:
@@ -262,7 +267,7 @@ def init_game():
                 width = res[0]
                 height = res[1]
                 ships = res[2]
-                sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height * 3 + 2, cols=width * 5 + 2))
+                sys.stdout.write("\x1b[8;{rows};{cols}t".format(rows=height * 6 + 5, cols=width * 5 + 2))
         except ConnectionRefusedError:
             print("No host found at: {ip}".format(ip=enemy_ip))
             exit(2)

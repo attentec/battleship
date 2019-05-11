@@ -77,11 +77,10 @@ class Ship:
                 return
         self.colliding = False
 
-    def place(self, board):
+    def place(self, place_ship):
         """Place ship."""
         if not self.colliding:
-            for i in range(self.length):
-                board[self.y[i]][self.x[i]] = 1
+            place_ship(self.current_ship)
             self.index += 1
             if self.index < len(self.ships):
                 self.length = self.ships[self.index]
@@ -95,3 +94,8 @@ class Ship:
         else:
             for i in range(self.length):
                 unicorn.set_pixel(self.x[i], self.y[i], 255, 255, 255)
+
+    @property
+    def current_ship(self):
+        """Get current ship."""
+        return [[self.x[i], self.y[i]] for i in range(self.length)]

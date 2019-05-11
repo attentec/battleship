@@ -1,0 +1,8 @@
+Ladda ner Python 3.7 från https://www.python.org/
+Kör installationsfilen.
+Kryssa i "Lägg till Python 3.7 i PATH" eller "Add Python 3.7 to PATH" beroende på språk.
+Välj "Instalera nu"/"Install Now"
+Starta PowerShell
+Kör `python -m pip install windows-curses`
+
+

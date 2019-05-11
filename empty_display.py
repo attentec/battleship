@@ -31,6 +31,7 @@ def show():
     """Do nothing, just here to implement the display interface."""
     pass
 
-def draw_text(message)::
+
+def draw_text(message):
     """Do nothing, just here to implement the display interface."""
     pass

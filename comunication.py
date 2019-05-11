@@ -4,6 +4,8 @@ import socket
 
 
 class Connection:
+    """Class handling the connection and communication to the opponent."""
+
     def __init__(self, host, is_client, port=5000):
         """Initialize connection with opponent."""
         self.port = port
@@ -13,6 +15,7 @@ class Connection:
             self.mySocket.connect((host, port))
             self.conn = self.mySocket
         else:
+            self.mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.mySocket.bind((host, port))
             self.mySocket.listen(1)
             print("Your ip-address: {ip}".format(
