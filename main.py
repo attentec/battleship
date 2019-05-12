@@ -175,7 +175,7 @@ def main(win):
                 game.draw_both_boards()
             display.set_pixel(cursor_x, cursor_y, 255, 255, 255)
         elif not game.waiting:
-            sleep(0.5)
+            sleep(0.5 / args.speed)
             move = ai.get_move(game.enemy_board)
             game.send_missile(move[1], move[0])
 
