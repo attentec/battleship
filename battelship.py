@@ -95,6 +95,7 @@ class Battleship:
         self.enemy_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.ally_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.waiting_for_rematch = False
+        self.placement_call_count = 0
 
     def blink_and_set(self, board1, x, y, value, board2, offset1=0, offset2=0):
         """Blink and set the pixel at x, y on the provided board with the given value."""
