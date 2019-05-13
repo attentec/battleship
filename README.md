@@ -13,7 +13,7 @@ Open 2 terminals and in the first run:
 
 Change the `<first ai>` to the name of the `ai` python file you want to try.
 
-`python3 main.py --host --ships 5 4 4 3 3 3  --width 13 --heigh 13 --ai <first ai>`
+`python3 main.py --host --ships 5 4 4 3 3 3  --width 13 --height 13 --ai <first ai>`
 
 In the second terminal run:
 
