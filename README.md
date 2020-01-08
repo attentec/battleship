@@ -22,6 +22,8 @@ Change the `<second ai>` to the name of the `ai` python file you want to run you
 
 `python3 main.py --display --client <ip> --ai <second ai>`
 
+Hold Esc to quit a ongoing AI match
+
 
 ## Instructions of use
 The game can be executed on a Raspberry pi with a 4 x 8 Unicorn pHAT or in a terminal.
@@ -48,7 +50,7 @@ The default port is 5000 but can be changed by providing a number to `--port=<po
 
 **R** — Rotate ship during placement.
 
-**Esc** — Quit the game. Only possible during your turn.
+**Esc** — Quit the game. Only possible during your turn. Hold to quit an AI game
 
 ## Runing on windows
 Install Python 3 for Windows

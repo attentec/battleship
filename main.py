@@ -176,6 +176,10 @@ def main(win):
             display.set_pixel(cursor_x, cursor_y, 255, 255, 255)
         elif not game.waiting:
             sleep(0.5 / args.speed)
+            key = win.getch()
+            if key == KEY_ESC:
+                connection.close_connection()
+                exit(0)
             move = ai.get_move(game.enemy_board)
             game.send_missile(move[1], move[0])
 
