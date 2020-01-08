@@ -36,6 +36,7 @@ class Battleship:
         self.ally_board = [[0 for _ in range(self.width)] for _ in range(self.height)]
         self.placement_call_count = 0
         self.speed = speed
+        self.won = False
 
     @staticmethod
     def get_color(color):
@@ -120,6 +121,7 @@ class Battleship:
         if response == 4:
             self.draw_victory_board()
             self.print_message('You won!')
+            self.won = True
             self.display.show()
             sleep(3 / self.speed)
             if self.is_host:

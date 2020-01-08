@@ -191,9 +191,13 @@ def main(win):
             display.show()
             game.await_incoming()
             curses.flushinp()
+            game.print_message("AI: {}".format(args.ai))
 
         if game.waiting_for_rematch:
-            game.print_message("Rematch? [y/n] ")
+            if is_ai:
+              game.print_message("AI: {} {}\nRematch? [y/n] ".format(args.ai, 'won' if game.won else 'lost'))
+            else:
+              game.print_message("{}\nRematch? [y/n] ".format('You won' if game.won else 'You lost'))
             while True:
                 sleep(0.1)
                 key = win.getch()

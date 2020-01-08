@@ -65,6 +65,8 @@ def draw_text(message):
     """Draw text."""
     global height
     safe_addstr(height * 3 * 2 + 6, 0, message, curses.color_pair(6))
+    window.clrtobot()
+    window.refresh()
 
 
 def show():
