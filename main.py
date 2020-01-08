@@ -134,7 +134,7 @@ def main(win):
     global ai, game, cursor_x, cursor_y, is_host, is_unicorn
 
     if is_ai:
-        ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
+        ai_module = __import__(args.ai.replace('.py', '').replace('.\\', '') if args.ai is not None else 'ai')
         ai = ai_module.Ai(width, height, display.PHAT)
 
     game = Battleship(height, width, ships, display, connection, is_host, is_unicorn, args.speed)
@@ -216,7 +216,7 @@ def main(win):
             cursor_x = 0
             cursor_y = 0
             if is_ai:
-                ai_module = __import__(args.ai.replace('.py', '') if args.ai is not None else 'ai')
+                ai_module = __import__(args.ai.replace('.py', '').replace('.\\', '') if args.ai is not None else 'ai')
                 ai = ai_module.Ai(width, height, display.PHAT)
             place_ships(win)
         display.show()
