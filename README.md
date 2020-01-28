@@ -13,14 +13,14 @@ Open 2 terminals and in the first run:
 
 Change the `<first ai>` to the name of the `ai` python file you want to try.
 
-`python3 main.py --host --ships 5 4 4 3 3 3  --width 13 --height 13 --ai <first ai>`
+`python3 main.py --host --ships 5 4 4 3 3 3  --width 15 --height 10 --speed 10 --ai <first ai>`
 
 In the second terminal run:
 
 Change the `<ip>` to that displayed in the first terminal.
 Change the `<second ai>` to the name of the `ai` python file you want to run your first ai against, it could be the same ai.
 
-`python3 main.py --display --client <ip> --ai <second ai>`
+`python3 main.py --display --client <ip> --speed 10 --ai <second ai>`
 
 Hold Esc to quit a ongoing AI match
 
